@@ -83,14 +83,14 @@ jobs:
 
       - name: Set up and transfer files to the remote server
         run: |
-          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} << 'EOF'
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
             # Create application directories and directories for SSL certificates
             mkdir -p /home/ubuntu/timestamp_app/persistentdata/certbot/www
             mkdir -p /home/ubuntu/timestamp_app/persistentdata/certbot/conf/live/demo.docktor-di.com/
           
             exit 0
           EOF
-          scp .env docker-compose.gensslkey.yml ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/ubuntu/timestamp_app
+          scp .env docker-compose.gensslkey.prod.yml ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/ubuntu/timestamp_app
 
       - name: Set permissions on the remote server
         run: |
