@@ -41,7 +41,12 @@ jobs:
       - name: Log in to GitHub Packages
         run: echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u initialdeploy --password-stdin
 
+      - name: Tag images
+        run: |
+          docker tag web-gensslkey ghcr.io/gensslkey/onlyonce/initialdeployment/web-gensslkey:v1.0.0
+          docker tag web-gensslkey ghcr.io/gensslkey/onlyonce/initialdeployment/nginx-gensslkey:v1.0.0
+
       - name: Push images to registry
         run: |
-            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/web-gensslkey:latest
-            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/nginx-gensslkey:latest
+            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/web-gensslkey:v1.0.0
+            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/nginx-gensslkey:v1.0.0
