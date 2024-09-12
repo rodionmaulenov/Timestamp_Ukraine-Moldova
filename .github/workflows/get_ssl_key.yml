@@ -43,5 +43,5 @@ jobs:
 
       - name: Push images to registry
         run: |
-            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/web:latest
-            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/nginx:latest
+            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/web-gensslkey:latest
+            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/nginx-gensslkey:latest
