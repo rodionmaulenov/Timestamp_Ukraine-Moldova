@@ -36,7 +36,7 @@ jobs:
 
       - name: Building docker images
         run: |
-            docker-compose -f docker-compose.gensslkey.yaml build --no-cache
+            docker-compose -f docker-compose.gensslkey.yml build --no-cache
 
       - name: Log in to GitHub Packages
         run: echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u initialdeploy --password-stdin
