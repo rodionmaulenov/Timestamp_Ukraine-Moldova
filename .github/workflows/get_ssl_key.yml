@@ -36,17 +36,80 @@ jobs:
 
       - name: Building docker images
         run: |
-            docker-compose -f docker-compose.gensslkey.yml build --no-cache
+            docker-compose -f docker-compose.cicd.gensslkey.yml build --no-cache
 
       - name: Log in to GitHub Packages
         run: echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
 
       - name: Tag images
         run: |
-          docker tag web-gensslkey ghcr.io/rodionmaulenov/gensslkey/web-gensslkey:v1.0.0
-          docker tag web-gensslkey ghcr.io/rodionmaulenov/gensslkey/nginx-gensslkey:v1.0.0
+          docker tag web-gensslkey ghcr.io/rodionmaulenov/scheduler/gensslkey/web-gensslkey:v1.0.0
+          docker tag web-gensslkey ghcr.io/rodionmaulenov/scheduler/gensslkey/nginx-gensslkey:v1.0.0
 
       - name: Push images to registry
         run: |
-            docker push ghcr.io/rodionmaulenov/gensslkey/web-gensslkey:v1.0.0
-            docker push ghcr.io/rodionmaulenov/gensslkey/nginx-gensslkey:v1.0.0
+            docker push ghcr.io/rodionmaulenov/scheduler/gensslkey/web-gensslkey:v1.0.0
+            docker push ghcr.io/rodionmaulenov/scheduler/gensslkey/nginx-gensslkey:v1.0.0
+          
+
+  deploy:
+    name: Deploy on AWS EC2
+    runs-on: ubuntu-latest
+    needs: build-dockers-images
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4.0.0
+
+      - name: Create .env file
+        uses: skiddph/actions-env@v1.0.3
+
+        env:
+          ENV_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          ENV_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          ENV_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          ENV_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          ENV_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT}}
+          ENV_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE}}
+
+      - name: Add ssh private key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+            ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+
+      - name: Set up and transfer files to the remote server
+        run: |
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} << 'EOF'
+            # Create application directories and directories for SSL certificates
+            mkdir -p /home/ubuntu/timestamp_app/persistentdata/certbot/www
+            mkdir -p /home/ubuntu/timestamp_app/persistentdata/certbot/conf/live/demo.docktor-di.com/
+          
+            exit 0
+          EOF
+          scp .env docker-compose.gensslkey.yml ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/ubuntu/timestamp_app
+
+      - name: Set permissions on the remote server
+        run: |
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} "chmod -R u+rwx /home/ubuntu/timestamp_app"
+      
+
+      - name: Connect and pull Docker images
+        run: |
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} << 'EOF'
+            cd /home/ubuntu/timestamp_app
+          
+            echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
+            docker pull ghcr.io/rodionmaulenov/gensslkey/nginx-gensslkey:v1.0.0
+            docker pull ghcr.io/rodionmaulenov/gensslkey/web-gensslkey:v1.0.0
+          
+            docker-compose -f docker-compose.gensslkey.prod.yml up -d
+            
+            docker-compose run --rm --entrypoint "\
+              certbot certonly --webroot -w /var/www/certbot \
+                --email ${{ secrets.MY_EMAIL }} \
+                -d demo.docktor-di.com \
+                --rsa-key-size 2048 \
+                --agree-tos \
+                --force-renewal" certbot
+          EOF
+
