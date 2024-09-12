@@ -77,6 +77,10 @@ jobs:
         with:
             ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
 
+      - name: Add remote server to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.EC2_SERVER_IP }} >> ~/.ssh/known_hosts
+
       - name: Set up and transfer files to the remote server
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} << 'EOF'
