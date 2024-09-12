@@ -92,11 +92,6 @@ jobs:
           EOF
           scp .env docker-compose.gensslkey.prod.yml ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/ubuntu/timestamp_app
 
-      - name: Set permissions on the remote server
-        run: |
-          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} "chmod -R u+rwx /home/ubuntu/timestamp_app"
-      
-
       - name: Connect and pull Docker images
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
