@@ -1,0 +1,20 @@
+.env
+media
+static
+mydatabase
+.idea
+.dockerignore
+
+
+# Python bytecode and cache directories
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Django migrations
+**/migrations/
+**/__pycache__/
+**/*.pyc
+

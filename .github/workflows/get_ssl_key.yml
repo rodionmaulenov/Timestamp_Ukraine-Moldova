@@ -1,0 +1,36 @@
+name: For getting ssl key at first. Only for this goal.
+
+on:
+  push:
+    branches:
+      - gensslkey
+
+jobs:
+  build-dockers-images:
+    name: Push images to GIT Registry
+    runs-on: ubuntu:latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4.0.0
+
+      - name: Create .env file
+        uses: skiddph/actions-env@v1.0.3
+
+        env:
+          ENV_VAR1: ${{ secrets.VAR1 }} # prefix + key = value
+          ENV_VAR2: ${{ secrets.VAR2 }} # prefix is removed in .env file
+          ENV_VAR3: ${{ secrets.VAR3 }} # prefix is only used for key lookup
+          ENV_VAR4: ${{ secrets.VAR4 }} # env vars must be uppercase
+
+      - name: Building docker images
+        run: |
+            docker-compose -f docker-compose.gensslkey.yaml build --no-cache
+
+      - name: Log in to GitHub Packages
+        run: echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u initialdeploy --password-stdin
+
+      - name: Push images to registry
+        run: |
+            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/web:latest
+            docker push ghcr.io/gensslkey/onlyonce/initialdeployment/nginx:latest

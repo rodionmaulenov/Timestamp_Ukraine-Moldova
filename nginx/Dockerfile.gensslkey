@@ -1,0 +1,3 @@
+FROM nginx:stable
+
+COPY ./gensslkey.conf /etc/nginx/conf.d/gensslkey.conf
