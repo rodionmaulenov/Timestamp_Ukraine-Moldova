@@ -12,7 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   web:
-    image: ghcr.io/rodionmaulenov/gensslkey/nginx-gensslkey:v1.0.0
+    image: ghcr.io/rodionmaulenov/gensslkey/web-gensslkey:v1.0.0
     command: /bin/sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py collectstatic --noinput &&
