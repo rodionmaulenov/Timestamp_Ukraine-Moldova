@@ -76,6 +76,15 @@ services:
       - ./persistentdata/certbot/conf:/etc/letsencrypt
       - ./persistentdata/certbot/www:/var/www/certbot
 
+  telegram:
+    image: ghcr.io/rodionmaulenov/timestamp/telegram-prod:v1.0.0
+    command: /bin/sh -c "python schedule/telegram.py"
+    depends_on:
+      - db
+      - web
+    env_file:
+      - .env
+
 
 volumes:
   postgres_data:
