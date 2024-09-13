@@ -49,11 +49,13 @@ jobs:
             docker tag web-prod ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
             docker tag celery-prod ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
             docker tag celery-beat-prod ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
+            docker tag tel-prod ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
           
             docker push ghcr.io/rodionmaulenov/timestamp/nginx-prod:v1.0.0
             docker push ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
             docker push ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
             docker push ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
+            docker push ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
 
   deploy:
     name: Deploy on AWS EC2
@@ -110,6 +112,7 @@ jobs:
             docker pull ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
             docker pull ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.
             docker pull ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
+            docker pull ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
             
             docker-compose -f docker-compose.prod.yml up -d
           EOF

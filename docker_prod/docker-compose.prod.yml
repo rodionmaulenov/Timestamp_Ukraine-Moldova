@@ -77,7 +77,7 @@ services:
       - ./persistentdata/certbot/www:/var/www/certbot
 
   telegram:
-    image: ghcr.io/rodionmaulenov/timestamp/telegram-prod:v1.0.0
+    image: ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
     command: /bin/sh -c "python schedule/telegram.py"
     depends_on:
       - db
