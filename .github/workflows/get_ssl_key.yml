@@ -62,7 +62,7 @@ jobs:
           scp ./docker_gen_ssl/docker-compose.prod.yml \
           ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
 
-      - name: Connect and pull Docker images
+      - name: Pull Docker images and Get ssl key
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
             cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
@@ -71,12 +71,5 @@ jobs:
             docker pull ghcr.io/rodionmaulenov/timestamp/nginx-gensslkey:v1.0.0
           
             docker-compose -f docker-compose.prod.yml up -d
-            
-            certonly --webroot -w /var/www/certbot \
-              --email rodion.maulenov@gmail.com \
-              -d demo.docktor-di.com \
-              --rsa-key-size 2048 \
-              --agree-tos \
-              --force-renewal
           EOF
 
