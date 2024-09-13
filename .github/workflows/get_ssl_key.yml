@@ -73,13 +73,14 @@ jobs:
 
             docker-compose -f docker-compose.prod.yml up -d nginx
 
-            docker-compose run --rm certbot certonly --webroot -w /var/www/certbot \
-            --email rodion.maulenov@gmail.com \
+            docker-compose -f docker-compose.prod.yml run \
+            --rm certbot certonly \
+            --webroot -w /var/www/certbot \
+            --email ${{ secrets.MY_EMAIL }} \
             -d demo.docktor-di.com \
             --rsa-key-size 2048 \
             --agree-tos \
             --force-renewal \
-            --non-interactive
           EOF
       
 
