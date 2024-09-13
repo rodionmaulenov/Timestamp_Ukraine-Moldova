@@ -72,15 +72,14 @@ jobs:
             docker pull ghcr.io/rodionmaulenov/timestamp/nginx-gensslkey:v1.0.0
 
             docker-compose -f docker-compose.prod.yml up -d nginx
-           
 
-            docker-compose run --rm --entrypoint "\
-            certbot certonly --webroot -w /var/www/certbot \
-              --email rodion.maulenov@gmail.com \
-              -d demo.docktor-di.com \
-              --rsa-key-size 2048 \
-              --agree-tos \
-              --force-renewal \" certbot
+            docker-compose run --rm certbot certonly --webroot -w /var/www/certbot \
+            --email rodion.maulenov@gmail.com \
+            -d demo.docktor-di.com \
+            --rsa-key-size 2048 \
+            --agree-tos \
+            --force-renewal \
+            --non-interactive
           EOF
       
 
