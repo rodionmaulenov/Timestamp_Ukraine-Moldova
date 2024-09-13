@@ -27,8 +27,9 @@ def update_exit_field():
 
     latest_dates = calculate_last_disable_dates_sync()
 
-    # Update the exit date for the latest dates
-    latest_dates.update(exit=day_today)
+    if latest_dates:
+        # Update the exit date for the latest dates
+        latest_dates.update(exit=day_today)
 
 
 @shared_task()

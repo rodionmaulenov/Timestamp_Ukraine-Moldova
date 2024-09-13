@@ -16,10 +16,10 @@ jobs:
 
       - name: Install Docker Compose
         run: |
-            sudo apt-get update
-            curl -fsSL https://get.docker.com -o get-docker.sh
-            sudo sh get-docker.sh
-            sudo apt install docker-compose -y 
+          sudo apt-get update
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh
+          sudo apt install docker-compose -y 
 
       - name: Make envfile
         uses: skiddph/actions-env@v1.0.3
@@ -38,24 +38,24 @@ jobs:
 
       - name: Building docker images
         run: |
-            cd docker_prod
-            docker-compose -f docker-compose.cicd.yml build --no-cache
+          cd docker_prod
+          docker-compose -f docker-compose.cicd.yml build --no-cache
 
       - name: Push images to registry
         run: |
-            echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
+          echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
           
-            docker tag nginx-prod ghcr.io/rodionmaulenov/timestamp/nginx-prod:v1.0.0
-            docker tag web-prod ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
-            docker tag celery-prod ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
-            docker tag celery-beat-prod ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
-            docker tag tel-prod ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
+          docker tag nginx-prod ghcr.io/rodionmaulenov/timestamp/nginx-prod:v1.0.0
+          docker tag web-prod ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
+          docker tag celery-prod ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
+          docker tag celery-beat-prod ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
+          docker tag tel-prod ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
           
-            docker push ghcr.io/rodionmaulenov/timestamp/nginx-prod:v1.0.0
-            docker push ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
-            docker push ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
-            docker push ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
-            docker push ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
+          docker push ghcr.io/rodionmaulenov/timestamp/nginx-prod:v1.0.0
+          docker push ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
+          docker push ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
+          docker push ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
+          docker push ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
 
   deploy:
     name: Deploy on AWS EC2
@@ -101,17 +101,6 @@ jobs:
           scp ./docker_prod/docker-compose.prod.yml .env \
           ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
 
-      #DO THIS ONLY ONCE
-      - name: Install extensions for ssl
-        run: |
-          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
-          cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
-          wget https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf 
-          mv options-ssl-nginx.conf ./persistentdata/certbot/conf/ 
-          wget https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem
-          mv ssl-dhparams.pem ./persistentdata/certbot/conf/
-          EOF
-
 
       - name: Pull Docker images and Get ssl key
         run: |
@@ -125,6 +114,12 @@ jobs:
             docker pull ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.
             docker pull ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
             docker pull ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
-            
+          
             docker-compose -f docker-compose.prod.yml up -d
+          EOF
+          
+      - name: Remove <none> Docker images
+        run: |
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
+            docker images -f "dangling=true" -q | xargs -r docker rmi
           EOF
