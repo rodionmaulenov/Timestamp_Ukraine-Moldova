@@ -8,5 +8,8 @@ services:
     image: nginx-gensslkey
     ports:
       - "80:80"
+    volumes:
+      - ./persistentdata/certbot/conf:/etc/letsencrypt
+      - ./persistentdata/certbot/www:/var/www/certbot
 
 
