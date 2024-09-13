@@ -28,8 +28,8 @@ services:
              gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000"
     volumes:
       - .:/usr/src/app
-      - static:/usr/src/app/static
-      - media:/usr/src/app/media
+      - ./static:/usr/src/app/static
+      - ./media:/usr/src/app/media
     ports:
       - "8000:8000"
     depends_on:
@@ -92,8 +92,8 @@ services:
     volumes:
       - ./persistentdata/certbot/conf:/etc/letsencrypt
       - ./persistentdata/certbot/www:/var/www/certbot
-      - static:/usr/src/app/static
-      - media:/usr/src/app/media
+      - ./static:/usr/src/app/static
+      - ./media:/usr/src/app/media
 
   certbot:
     image: certbot/certbot

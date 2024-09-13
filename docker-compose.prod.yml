@@ -27,9 +27,8 @@ services:
              python manage.py collectstatic --noinput &&
              gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000"
     volumes:
-      - .:/usr/src/app
-      - static:/usr/src/app/static
-      - media:/usr/src/app/media
+      - ./static:/usr/src/app/static
+      - ./media:/usr/src/app/media
     ports:
       - "8000:8000"
     depends_on:
@@ -50,8 +49,6 @@ services:
     build: .
     command: celery -A scheduler worker --loglevel=info
     restart: always
-    volumes:
-      - .:/usr/src/app
     depends_on:
       - db
       - redis
@@ -67,8 +64,6 @@ services:
     build: .
     command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     restart: always
-    volumes:
-      - .:/usr/src/app
     depends_on:
       - db
       - redis
@@ -92,8 +87,8 @@ services:
     volumes:
       - ./persistentdata/certbot/conf:/etc/letsencrypt
       - ./persistentdata/certbot/www:/var/www/certbot
-      - static:/usr/src/app/static
-      - media:/usr/src/app/media
+      - ./static:/usr/src/app/static
+      - ./media:/usr/src/app/media
 
   certbot:
     image: certbot/certbot
@@ -104,5 +99,3 @@ services:
 
 volumes:
   postgres_data:
-  static:
-  media:
