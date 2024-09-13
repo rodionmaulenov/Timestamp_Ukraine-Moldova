@@ -16,7 +16,9 @@ RUN apt-get update && \
 COPY . /usr/src/app/
 
 # Create a non-root user `celeryuser` with no password and add it to the app directory
-RUN adduser --disabled-password --gecos "" --no-create-home customuser
+RUN adduser --disabled-password --gecos "" --no-create-home customuser && \
+    chown -R customuser:customuser /usr/src/app && \
+    chmod -R 775 /usr/src/app
 
 # Switch to non-root user
 USER customuser
