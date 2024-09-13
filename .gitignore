@@ -12,6 +12,4 @@ __pycache__/
 *.pyd
 .Python
 
-# Ignore everything in migrations folder
-**/migrations/*
 
