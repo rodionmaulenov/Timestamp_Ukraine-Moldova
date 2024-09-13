@@ -54,8 +54,9 @@ jobs:
       - name: Create application directories and directories for SSL certificates
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
-            mkdir -p /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app/persistentdata/certbot/www
+            mkdir -p /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app/persistentdata/certbot/www..well-known/acme-challenge/
             mkdir -p /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app/persistentdata/certbot/conf/live/demo.docktor-di.com/
+            sudo chmod -R 755 /var/www/certbot
           
             exit 0
           EOF
