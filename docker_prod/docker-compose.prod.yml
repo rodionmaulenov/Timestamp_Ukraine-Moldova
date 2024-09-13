@@ -34,8 +34,6 @@ services:
     depends_on:
       - db
       - redis
-      - celery
-      - celery-beat
     env_file:
       - .env
 
@@ -44,16 +42,17 @@ services:
     command: celery -A scheduler worker --loglevel=info
     restart: always
     depends_on:
+      - web
       - db
       - redis
     env_file:
       - .env
 
   celery-beat:
-    restart: on-failure
     image: ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
     command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
+      - web
       - db
       - redis
     env_file:
