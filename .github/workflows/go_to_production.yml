@@ -25,17 +25,14 @@ jobs:
         uses: skiddph/actions-env@v1.0.3
         with:
           ENV_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
-
           ENV_DEBUG: ${{ secrets.DEBUG }}
           ENV_SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ENV_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
-
           ENV_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           ENV_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           ENV_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           ENV_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           ENV_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-
           ENV_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           ENV_CHAT_ID: ${{ secrets.CHAT_ID }}
 
@@ -71,17 +68,14 @@ jobs:
         uses: skiddph/actions-env@v1.0.3
         with:
           ENV_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
-
           ENV_DEBUG: ${{ secrets.DEBUG }}
           ENV_SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ENV_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
-
           ENV_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           ENV_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           ENV_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           ENV_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           ENV_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-
           ENV_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           ENV_CHAT_ID: ${{ secrets.CHAT_ID }}
 
