@@ -19,7 +19,7 @@ jobs:
             sudo apt-get update
             curl -fsSL https://get.docker.com -o get-docker.sh
             sudo sh get-docker.sh
-            sudo apt install docker-compose -y
+            sudo apt install docker-compose -y 
 
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v2.0.3
