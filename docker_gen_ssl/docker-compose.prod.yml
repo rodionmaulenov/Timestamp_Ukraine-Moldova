@@ -12,12 +12,13 @@ services:
 
   certbot:
     image: certbot/certbot
-    command: certonly --webroot -w /var/www/certbot \
-          --email rodion.maulenov@gmail.com \
-          -d demo.docktor-di.com \
-          --rsa-key-size 2048 \
-          --agree-tos \
-          --force-renewal
+    command: >
+      certonly --webroot -w /var/www/certbot \
+      --email rodion.maulenov@gmail.com \
+      -d demo.docktor-di.com \
+      --rsa-key-size 2048 \
+      --agree-tos \
+      --force-renewal
     volumes:
       - ./persistentdata/certbot/conf:/etc/letsencrypt
       - ./persistentdata/certbot/www:/var/www/certbot
