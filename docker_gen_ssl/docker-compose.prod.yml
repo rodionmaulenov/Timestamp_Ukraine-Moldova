@@ -3,7 +3,7 @@ version: '3.8'
 services:
 
   nginx:
-    image: ghcr.io/rodionmaulenov/gensslkey/nginx-gensslkey:v1.0.0
+    image: ghcr.io/rodionmaulenov/timestamp/nginx-gensslkey:v1.0.0
     ports:
       - "80:80"
     volumes:
