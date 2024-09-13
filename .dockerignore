@@ -11,6 +11,3 @@ __pycache__/
 *.pyd
 .Python
 
-# Django migrations
-**/migrations/
-
