@@ -12,6 +12,6 @@ __pycache__/
 *.pyd
 .Python
 
-# Django migrations
-**/migrations/
+# Ignore everything in migrations folder
+**/migrations/*
 
