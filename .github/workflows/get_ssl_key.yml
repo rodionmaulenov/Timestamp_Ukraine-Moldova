@@ -81,9 +81,6 @@ jobs:
             --rsa-key-size 2048 \
             --agree-tos \
             --force-renewal \
-          
-            docker rm -f \$(docker ps -aq)
-            docker rmi -f \$(docker images -aq)
           EOF
       
 
