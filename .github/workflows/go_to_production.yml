@@ -22,22 +22,22 @@ jobs:
             sudo apt install docker-compose -y 
 
       - name: Make envfile
-        uses: SpicyPizza/create-envfile@v2.0.3
+        uses: skiddph/actions-env@v1.0.3
         with:
-          envkey_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+          ENV_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
 
-          envkey_DEBUG: ${{ secrets.DEBUG }}
-          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          ENV_DEBUG: ${{ secrets.DEBUG }}
+          ENV_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ENV_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
 
-          envkey_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          envkey_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          envkey_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          envkey_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          ENV_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          ENV_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          ENV_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          ENV_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          ENV_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
 
-          envkey_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          envkey_CHAT_ID: ${{ secrets.CHAT_ID }}
+          ENV_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ENV_CHAT_ID: ${{ secrets.CHAT_ID }}
 
       - name: Building docker images
         run: |
@@ -68,22 +68,22 @@ jobs:
         uses: actions/checkout@v4.0.0
 
       - name: Make envfile
-        uses: SpicyPizza/create-envfile@v2.0.3
+        uses: skiddph/actions-env@v1.0.3
         with:
-          envkey_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+          ENV_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
 
-          envkey_DEBUG: ${{ secrets.DEBUG }}
-          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          ENV_DEBUG: ${{ secrets.DEBUG }}
+          ENV_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ENV_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
 
-          envkey_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          envkey_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          envkey_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          envkey_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          ENV_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          ENV_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          ENV_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          ENV_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          ENV_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
 
-          envkey_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          envkey_CHAT_ID: ${{ secrets.CHAT_ID }}
+          ENV_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ENV_CHAT_ID: ${{ secrets.CHAT_ID }}
 
       - name: Add ssh private key
         uses: webfactory/ssh-agent@v0.9.0
