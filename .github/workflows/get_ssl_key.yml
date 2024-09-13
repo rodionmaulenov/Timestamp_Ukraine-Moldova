@@ -29,7 +29,7 @@ jobs:
       - name: Push images to registry
         run: |
             echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
-            docker tag web-gensslkey ghcr.io/rodionmaulenov/timestamp/nginx-gensslkey:v1.0.0
+            docker tag nginx-gensslkey ghcr.io/rodionmaulenov/timestamp/nginx-gensslkey:v1.0.0
             docker push ghcr.io/rodionmaulenov/timestamp/nginx-gensslkey:v1.0.0
           
 
