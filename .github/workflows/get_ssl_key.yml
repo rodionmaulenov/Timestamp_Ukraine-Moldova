@@ -67,10 +67,21 @@ jobs:
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
             cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
-          
+
             echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
+
             docker pull ghcr.io/rodionmaulenov/timestamp/nginx-gensslkey:v1.0.0
-          
-            docker-compose -f docker-compose.prod.yml up -d
+
+            docker-compose -f docker-compose.prod.yml up -d nginx
+
+            docker-compose run --rm --entrypoint "\
+            certbot certonly --webroot -w /var/www/certbot \
+              --email rodion.maulenov@gmail.com \
+              -d demo.docktor-di.com \
+              --rsa-key-size 2048 \
+              --agree-tos \
+              --force-renewal \
+              --non-interactive" certbot
           EOF
+      
 
