@@ -104,13 +104,5 @@ jobs:
             docker pull ghcr.io/rodionmaulenov/gensslkey/web-gensslkey:v1.0.0
           
             docker-compose -f docker-compose.gensslkey.prod.yml up -d
-            
-            docker-compose run --rm --entrypoint "\
-              certbot certonly --webroot -w /var/www/certbot \
-                --email ${{ secrets.MY_EMAIL }} \
-                -d demo.docktor-di.com \
-                --rsa-key-size 2048 \
-                --agree-tos \
-                --force-renewal" certbot
           EOF
 

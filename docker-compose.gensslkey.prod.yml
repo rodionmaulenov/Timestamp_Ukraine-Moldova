@@ -2,7 +2,6 @@ version: '3.8'
 
 services:
   db:
-    restart: always
     image: postgres:13
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -12,7 +11,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   web:
-    restart: always
     image: ghcr.io/rodionmaulenov/gensslkey/web-gensslkey:v1.0.0
     command: /bin/sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
@@ -34,7 +32,6 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
 
   nginx:
-    restart: always
     image: ghcr.io/rodionmaulenov/gensslkey/nginx-gensslkey:v1.0.0
     ports:
       - "80:80"
@@ -46,8 +43,11 @@ services:
       - ./media:/usr/src/app/media
 
   certbot:
-    restart: always
     image: certbot/certbot
+    command: certonly --webroot --webroot-path=/var/www/certbot \
+              --email rodion.maulenov@gmail.com \
+              --agree-tos --no-eff-email --force-renewal \
+              -d demo.docktor-di.com
     volumes:
       - ./persistentdata/certbot/conf:/etc/letsencrypt
       - ./persistentdata/certbot/www:/var/www/certbot
