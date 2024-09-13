@@ -21,11 +21,11 @@ services:
 
   web:
     image: ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
-    command: /bin/sh -c "python schedule/telegram.py &&
-             python manage.py makemigrations &&
+    command: /bin/sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000"
+             gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000 &&
+             python schedule/telegram.py"
     volumes:
       - ./static:/usr/src/app/static
       - ./media:/usr/src/app/media
