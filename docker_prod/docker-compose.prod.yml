@@ -20,14 +20,13 @@ services:
       - "6379:6379"
 
   web:
-    build: .
+    build: ..
     image: web-gensslkey
     command: /bin/sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py collectstatic --noinput &&
              gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000"
     volumes:
-      - .:/usr/src/app
       - ./static:/usr/src/app/static
       - ./media:/usr/src/app/media
     ports:
@@ -47,11 +46,9 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
 
   celery:
-    build: .
+    build: ..
     command: celery -A scheduler worker --loglevel=info
     restart: always
-    volumes:
-      - .:/usr/src/app
     depends_on:
       - db
       - redis
@@ -64,11 +61,9 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
 
   celery-beat:
-    build: .
+    build: ..
     command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     restart: always
-    volumes:
-      - .:/usr/src/app
     depends_on:
       - db
       - redis
@@ -83,8 +78,8 @@ services:
   nginx:
     restart: always
     build:
-      context: ./nginx
-      dockerfile: Dockerfile.gensslkey
+      context: ../nginx
+      dockerfile: ../nginx/Dockerfile.gensslkey
     image: nginx-gensslkey
     ports:
       - "80:80"
@@ -104,5 +99,3 @@ services:
 
 volumes:
   postgres_data:
-  static:
-  media:

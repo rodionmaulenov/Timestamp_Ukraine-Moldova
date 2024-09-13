@@ -1,9 +1,13 @@
 from aiogram import Bot, Dispatcher
 import asyncio
 import logging
+import os
+from dotenv import load_dotenv
 
-TELEGRAM_BOT_TOKEN = '6911204778:AAGjU6RvUWK8eNmvsFRF6CpuLBYlNMzSqMw'
-chat_id = '-1002171039112'
+load_dotenv()
+
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+chat_id = os.environ.get('CHAT_ID')
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
