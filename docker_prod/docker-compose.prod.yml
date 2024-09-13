@@ -29,10 +29,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - db
+      - redis
     env_file:
       - .env
 
@@ -41,8 +39,7 @@ services:
     command: celery -A scheduler worker --loglevel=info
     restart: always
     depends_on:
-      web:
-        condition: service_healthy
+      - web
     env_file:
       - .env
 
@@ -50,8 +47,7 @@ services:
     image: ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
     command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
-      web:
-        condition: service_healthy
+      - web
     env_file:
       - .env
 
@@ -62,8 +58,7 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      web:
-        condition: service_healthy
+      - web
     volumes:
       - ./persistentdata/certbot/conf:/etc/letsencrypt
       - ./persistentdata/certbot/www:/var/www/certbot
@@ -83,8 +78,7 @@ services:
     image: ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
     command: /bin/sh -c "python schedule/telegram.py"
     depends_on:
-      web:
-        condition: service_healthy
+      - web
     env_file:
       - .env
 
