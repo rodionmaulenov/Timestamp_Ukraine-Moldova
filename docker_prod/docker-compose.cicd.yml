@@ -3,7 +3,8 @@ version: '3.8'
 services:
   web:
     image: web-prod
-    build: .
+    build:
+      context: ..
     volumes:
       - ..:/usr/src/app
       - ../static:/usr/src/app/static
@@ -15,7 +16,8 @@ services:
 
   celery:
     image: celery-prod
-    build: .
+    build:
+      context: ..
     volumes:
       - ..:/usr/src/app
     env_file:
@@ -23,7 +25,8 @@ services:
 
   celery-beat:
     image: celery-beat-prod
-    build: .
+    build:
+      context: ..
     volumes:
       - ..:/usr/src/app
     env_file:
