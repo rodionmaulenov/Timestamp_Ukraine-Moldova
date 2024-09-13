@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  nginx:
+    build:
+      context: ../nginx
+      dockerfile: ../nginx/Dockerfile.gensslkey
+    image: nginx-gensslkey
+    ports:
+      - "80:80"
+
+

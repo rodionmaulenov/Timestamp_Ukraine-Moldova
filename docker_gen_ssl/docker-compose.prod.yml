@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+
+  nginx:
+    image: ghcr.io/rodionmaulenov/gensslkey/nginx-gensslkey:v1.0.0
+    ports:
+      - "80:80"
+    volumes:
+      - ./persistentdata/certbot/conf:/etc/letsencrypt
+      - ./persistentdata/certbot/www:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    command: certonly --webroot -w /var/www/certbot \
+              --email rodion.maulenov@gmail.com \
+              -d demo.docktor-di.com \
+              --rsa-key-size 2048 \
+              --agree-tos \
+              --force-renewa
+    volumes:
+      - ./persistentdata/certbot/conf:/etc/letsencrypt
+      - ./persistentdata/certbot/www:/var/www/certbot
