@@ -96,7 +96,8 @@ jobs:
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
             sudo chown -R ${{ secrets.USER_FOR_EC2 }}:${{ secrets.USER_FOR_EC2 }} /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
-            cd /home/ubuntu/timestamp_app
+            sudo chmod -R u+rwx /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
+            cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
           
             echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
             docker pull ghcr.io/rodionmaulenov/gensslkey/nginx-gensslkey:v1.0.0
