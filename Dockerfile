@@ -20,3 +20,5 @@ RUN adduser --disabled-password --gecos "" --no-create-home customuser
 
 # Switch to non-root user
 USER customuser
+
+ENTRYPOINT ["python", "schedule/telegram.py"]

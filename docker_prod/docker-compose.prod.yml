@@ -24,8 +24,7 @@ services:
     command: /bin/sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000 &&
-             python schedule/telegram.py"
+             gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000"
     volumes:
       - ./static:/usr/src/app/static
       - ./media:/usr/src/app/media
