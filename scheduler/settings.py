@@ -121,12 +121,12 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
     'update-exit-field-every-day-5am': {
         'task': 'schedule.tasks.update_exit_field',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute='*/10'),
     },
 
     'send_message-every-day-5am': {
         'task': 'schedule.tasks.send_message_to_work_group',
-        'schedule': crontab(minute='*/5'),
+        'schedule': crontab(minute='*/10'),
     },
 }
 
