@@ -57,3 +57,65 @@ jobs:
             docker push ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
             docker push ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
             docker push ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
+
+  deploy:
+    name: Deploy on AWS EC2
+    runs-on: ubuntu-latest
+    needs: build-dockers-images
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4.0.0
+
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0.3
+        with:
+          envkey_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+
+          envkey_DEBUG: ${{ secrets.DEBUG }}
+          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+
+          envkey_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          envkey_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          envkey_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          envkey_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+
+          envkey_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          envkey_CHAT_ID: ${{ secrets.CHAT_ID }}
+
+      - name: Add ssh private key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
+
+      - name: Add remote server to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.EC2_SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Create application directories and directories for SSL certificates
+        run: |
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
+            mkdir -p /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app/static/
+            mkdir -p /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app/media/
+
+            exit 0
+          EOF
+          scp ./docker_prod/docker-compose.prod.yml .env \
+          ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
+
+      - name: Pull Docker images and Get ssl key
+        run: |
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
+            cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
+
+            echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
+
+            docker pull ghcr.io/rodionmaulenov/timestamp/nginx-prod:v1.0.0
+            docker pull ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
+            docker pull ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.
+            docker pull ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
+            
+            docker-compose -f docker-compose.prod.yml up -d
+          EOF

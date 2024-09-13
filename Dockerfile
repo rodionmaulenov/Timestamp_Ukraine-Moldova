@@ -20,5 +20,3 @@ RUN adduser --disabled-password --gecos "" --no-create-home customuser
 
 # Switch to non-root user
 USER customuser
-
-CMD ["python", "schedule/telegram.py"]
