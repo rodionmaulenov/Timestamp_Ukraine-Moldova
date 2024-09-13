@@ -6,7 +6,4 @@ services:
       context: ../nginx
       dockerfile: ../nginx/Dockerfile.gensslkey
     image: nginx-gensslkey
-    ports:
-      - "80:80"
-
 

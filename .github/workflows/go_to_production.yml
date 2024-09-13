@@ -66,21 +66,6 @@ jobs:
       - name: Checkout master
         uses: actions/checkout@v4.0.0
 
-      - name: Make envfile
-        uses: skiddph/actions-env@v1.0.3
-        env:
-          ENV_DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
-          ENV_DEBUG: ${{ secrets.DEBUG }}
-          ENV_SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          ENV_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
-          ENV_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          ENV_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          ENV_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          ENV_POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          ENV_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-          ENV_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          ENV_CHAT_ID: ${{ secrets.CHAT_ID }}
-
       - name: Add ssh private key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -100,7 +85,6 @@ jobs:
           EOF
           scp ./docker_prod/docker-compose.prod.yml .env \
           ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
-
 
       - name: Pull Docker images and Get ssl key
         run: |
@@ -122,5 +106,5 @@ jobs:
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
             docker images -f "dangling=true" -q | xargs -r docker rmi
-            chmod -R 777 /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
+            sudo chmod -R 777 /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
           EOF
