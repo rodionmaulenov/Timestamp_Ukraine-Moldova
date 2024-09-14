@@ -1,6 +1,5 @@
 env
 media
-static
 mydatabase
 .idea
 .gitignore
