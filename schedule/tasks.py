@@ -39,7 +39,7 @@ def send_message_to_work_group():
             logger.info("Starting the process of sending a message to the work group.")
             try:
                 message = await sync_to_async(lambda : Message.objects.all().last())()
-                logger.info(f'{message.message_id}')
+
                 if message:
                     await bot.delete_message(chat_id=message.chat_id, message_id=message.message_id)
             except TelegramBadRequest:
