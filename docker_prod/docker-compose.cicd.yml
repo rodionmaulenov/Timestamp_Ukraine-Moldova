@@ -5,6 +5,7 @@ services:
     image: web-prod
     build:
       context: ..
+      dockerfile: Dockerfile
     volumes:
       - ..:/usr/src/app
       - ../static:/usr/src/app/static
@@ -14,6 +15,7 @@ services:
     image: celery-prod
     build:
       context: ..
+      dockerfile: Dockerfile
     volumes:
       - ..:/usr/src/app
 
@@ -21,6 +23,7 @@ services:
     image: celery-beat-prod
     build:
       context: ..
+      dockerfile: Dockerfile
     volumes:
       - ..:/usr/src/app
 
@@ -37,6 +40,6 @@ services:
     image: tel-prod
     build:
       context: ..
-      dockerfile: Dockerfile.telegram
+      dockerfile: Dockerfiletelegram
     volumes:
       - ..:/usr/src/app
