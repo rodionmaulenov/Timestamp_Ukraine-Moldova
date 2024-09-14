@@ -14,6 +14,12 @@ jobs:
       - name: Checkout master
         uses: actions/checkout@v4.0.0
 
+      - name: Install docker-compose
+        uses: ndeloof/install-compose-action@v0.0.1
+        with:
+          version: v2.1.0
+          legacy: true
+
       - name: Building docker images
         run: |
           cd docker_prod
