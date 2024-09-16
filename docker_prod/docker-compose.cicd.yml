@@ -6,30 +6,18 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-    volumes:
-      - ..:/usr/src/app
-      - ../static:/usr/src/app/static
-      - ../media:/usr/src/app/media
 
   celery:
     image: celery-prod
     build:
       context: ..
       dockerfile: Dockerfile
-    volumes:
-      - ..:/usr/src/app
-      - ../static:/usr/src/app/static
-      - ../media:/usr/src/app/media
 
   celery-beat:
     image: celery-beat-prod
     build:
       context: ..
       dockerfile: Dockerfile
-    volumes:
-      - ..:/usr/src/app
-      - ../static:/usr/src/app/static
-      - ../media:/usr/src/app/media
 
   nginx:
     image: nginx-prod
@@ -45,7 +33,3 @@ services:
     build:
       context: ..
       dockerfile: Dockerfiletelegram
-    volumes:
-      - ..:/usr/src/app
-      - ../static:/usr/src/app/static
-      - ../media:/usr/src/app/media
