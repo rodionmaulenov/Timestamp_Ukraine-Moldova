@@ -18,6 +18,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ..:/usr/src/app
+      - ../static:/usr/src/app/static
+      - ../media:/usr/src/app/media
 
   celery-beat:
     image: celery-beat-prod
@@ -26,6 +28,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ..:/usr/src/app
+      - ../static:/usr/src/app/static
+      - ../media:/usr/src/app/media
 
   nginx:
     image: nginx-prod
@@ -43,3 +47,5 @@ services:
       dockerfile: Dockerfiletelegram
     volumes:
       - ..:/usr/src/app
+      - ../static:/usr/src/app/static
+      - ../media:/usr/src/app/media

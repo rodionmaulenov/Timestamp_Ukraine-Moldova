@@ -38,6 +38,9 @@ services:
     image: ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
     command: celery -A scheduler worker --loglevel=info
     restart: always
+    volumes:
+      - ./static:/usr/src/app/static
+      - ./media:/usr/src/app/media
     depends_on:
       - web
     env_file:
@@ -46,6 +49,9 @@ services:
   celery-beat:
     image: ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
     command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./static:/usr/src/app/static
+      - ./media:/usr/src/app/media
     depends_on:
       - web
     env_file:
@@ -77,6 +83,9 @@ services:
   telegram:
     image: ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
     command: /bin/sh -c "python schedule/telegram.py"
+    volumes:
+      - ./static:/usr/src/app/static
+      - ./media:/usr/src/app/media
     depends_on:
       - web
     env_file:
