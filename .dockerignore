@@ -1,4 +1,5 @@
-env
+myvenv
+.env
 media
 .idea
 .gitignore

@@ -1,5 +1,7 @@
 media
 .idea
+myvenv
+.env
 
 # Python bytecode and cache directories
 __pycache__/
