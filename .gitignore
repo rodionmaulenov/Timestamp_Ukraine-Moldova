@@ -1,9 +1,6 @@
 .env
 media
-mydatabase
 .idea
-
-
 
 # Python bytecode and cache directories
 __pycache__/

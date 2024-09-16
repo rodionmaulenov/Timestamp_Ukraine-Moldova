@@ -1,22 +1,24 @@
-FROM python:3.10-alpine AS build
+FROM python:3.10-alpine as build
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /usr/src/app
+
+COPY . .
 
 RUN apk --no-cache add --virtual .build-deps \
     ca-certificates \
     build-base \
     postgresql-dev \
-    libpq \
+    libpq-dev \
     libffi-dev \
     linux-headers \
     musl-dev \
     jpeg-dev \
     zlib-dev \
-    && pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --upgrade pip --root-user-action=ignore \
+    && pip install --no-cache-dir --root-user-action=ignore -v -r requirements.txt \
     && find /usr/local \
       \( -type d -a -name test -o -name tests \) \
       -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
@@ -32,32 +34,10 @@ RUN apk --no-cache add --virtual .build-deps \
     && apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
-COPY requirements.txt /usr/src/app/
+#RUN adduser --disabled-password --gecos "" --no-create-home customuser && \
+#    chown -R customuser:customuser /usr/src/app && \
+#    chmod -R 775 /usr/src/app
+#
+#USER customuser
 
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
-
-COPY . /usr/src/app/
-
-
-FROM python:3.10-alpine
-
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-WORKDIR /usr/src/app
-
-#RUN apk add --no-cache \
-#    postgresql-libs \
-#    libpq \
-#    libjpeg \
-#    zlib
-
-COPY --from=builder /usr/local /usr/local
-COPY --from=builder /usr/src/app /usr/src/app
-
-RUN adduser --disabled-password --gecos "" --no-create-home customuser && \
-    chown -R customuser:customuser /usr/src/app
-
-USER customuser
 
