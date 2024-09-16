@@ -104,5 +104,5 @@ jobs:
       - name: Remove <none> Docker images
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
-            docker images -f "dangling=true" -q | xargs -r docker rmi
+            docker images -f "dangling=true" -q | xargs -r docker rmi -f
           EOF
