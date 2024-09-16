@@ -167,11 +167,11 @@ def get_objs_disable_false(latest_dates):
 
 async def make_message_content(result):
 
-    ukraine = f'🇺🇦 Ukraine who has <= 10 days: \n' + f'{result[0][0]}' + \
-              f'🇺🇦 Ukraine who has <= 30 days: \n' + f'{result[0][1]}\n'
+    ukraine = f'🇺🇦 Ukraine who has <=10 days: \n' + f'{result[0][0]}' + \
+              f'🇺🇦 Ukraine who has 10<=30 days: \n' + f'{result[0][1]}\n'
 
-    moldova = f'🇲🇩 Moldova who has <= 10 days: \n' + f'{result[1][0]}' + \
-              f'🇲🇩 Moldova who has <= 30 days: \n' + f'{result[1][1]}'
+    moldova = f'🇲🇩 Moldova who has <=10 days: \n' + f'{result[1][0]}' + \
+              f'🇲🇩 Moldova who has 10<=30 days: \n' + f'{result[1][1]}'
 
     return ukraine + moldova
 
