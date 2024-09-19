@@ -88,11 +88,8 @@ jobs:
       - name: Install extensions for ssl
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
-          # Ensure the directory structure for Certbot exists
-          mkdir -p /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app/persistentdata/certbot/conf/
+          cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app/persistentdata/certbot/conf/
           wget https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf 
-          mv options-ssl-nginx.conf ./persistentdata/certbot/conf/ 
           wget https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem
-          mv ssl-dhparams.pem ./persistentdata/certbot/conf/
           EOF
 
