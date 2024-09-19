@@ -14,4 +14,3 @@ schedule/migrations/*
 
 # But keep the __init__.py file
 !schedule/migrations/__init__.py
-
