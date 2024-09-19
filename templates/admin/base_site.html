@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+
+{% block branding %}
+    {{ block.super }}
+    <!-- Add your custom language switcher form below the branding -->
+    <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <select name="language" onchange="this.form.submit()">
+            <option value="en-us" {% if LANGUAGE_CODE == 'en-us' %}selected{% endif %}>eng</option>
+            <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>rus</option>
+        </select>
+    </form>
+{% endblock %}

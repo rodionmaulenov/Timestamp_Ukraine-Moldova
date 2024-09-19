@@ -9,4 +9,9 @@ __pycache__/
 *.pyd
 .Python
 
+# Ignore all files in the migrations folder
+schedule/migrations/*
+
+# But keep the __init__.py file
+!schedule/migrations/__init__.py
 

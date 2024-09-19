@@ -32,8 +32,8 @@ def update_exit_field():
         latest_dates.update(exit=day_today)
 
 
-@shared_task()
-def send_message_to_work_group():
+@shared_task(bind=True, max_retries=10, default_retry_delay=60)  # )
+def send_message_to_work_group(self):
     async def async_send_message():
         try:
             logger.info("Starting the process of sending a message to the work group.")
@@ -49,6 +49,12 @@ def send_message_to_work_group():
 
             resized_photo = await get_random_cat_photo_with_text()
             logger.info("Obtained a random cat photo with text.")
+
+            if resized_photo is None:
+                logger.error("Could not fetch cat photo. Retrying...")
+                # If photo is None, retry the task using Celery's retry mechanism
+                self.retry(exc=Exception("Failed to fetch photo"), countdown=60)
+                return
 
             list_of_tuples = await sync_to_async(lambda: get_objs_disable_false(latest_dates))()
             logger.info("Fetched list of tuples: %s", list_of_tuples)

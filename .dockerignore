@@ -3,10 +3,19 @@ myvenv
 media
 .idea
 .gitignore
+docker-compose.dev.yml
+Dockerfiledev
 
 # Python bytecode and cache directories
 __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# Ignore all migration files in the schedule/migrations directory
+schedule/migrations/*
+
+# But do not ignore the __init__.py file in the schedule/migrations directory
+!schedule/migrations/__init__.py
+
 

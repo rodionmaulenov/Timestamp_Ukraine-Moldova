@@ -10,20 +10,20 @@ from io import BytesIO
 import aiohttp
 import random
 
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
 
 async def get_random_cat_photo_with_text():
     logger.info("Fetching a random cat photo with text.")
 
     hello_texts = ["Hello", "Hola", "Bonjour", "Hallo", "Ciao", "Привет", "ПивПив", "МяоКокао",
-                   "Raxmat Shimkentskie", "Bolshe Valericha", "Chistim zybu\nna noch", "Nazira xvatit",
-                   "Alo garag", "Parvana sroki\ngoryat", "Ainura sdelay\nmne UZI", "Gad idi suda"]
+                   "Raxmat Shimkentskie", "Bolshe Valericha", "Chistim zybu", "Xvatit boltat",
+                   "Alo garag", "Parvana sroki goryat", "Ainura i gdu UZI", "Gad idi suda"]
 
-    colors = ["red", "green", "blue", "yellow", "white", "purple", "orange", "pink", "gold",  "violet"]
+    colors = ["red", "green", "blue", "yellow", "white", "orange", "pink"]
 
-    font_size = random.randint(60, 65)
+    font_size = 63
     font_color = random.choice(colors)
     hello_text = random.choice(hello_texts)
 
@@ -165,8 +165,8 @@ def get_objs_disable_false(latest_dates):
 
     return result
 
-async def make_message_content(result):
 
+async def make_message_content(result):
     ukraine = f'🇺🇦 Ukraine who has <=10 days: \n' + f'{result[0][0]}' + \
               f'🇺🇦 Ukraine who has 10<=30 days: \n' + f'{result[0][1]}\n'
 
@@ -176,10 +176,7 @@ async def make_message_content(result):
     return ukraine + moldova
 
 
-
-
 def convert_number_to_emoji(number):
-
     number_emojis = {
         0: '0️⃣',
         1: '1️⃣',
@@ -197,7 +194,6 @@ def convert_number_to_emoji(number):
 
 
 async def calculate_last_disable_dates():
-
     latest_entry_subquery = await sync_to_async(lambda: Date.objects.filter(
         surrogacy_id=OuterRef('surrogacy_id'),
         disable=False
@@ -212,7 +208,6 @@ async def calculate_last_disable_dates():
 
 
 def calculate_last_disable_dates_sync():
-
     latest_entry_subquery = Date.objects.filter(
         surrogacy_id=OuterRef('surrogacy_id'),
         disable=False
@@ -223,6 +218,3 @@ def calculate_last_disable_dates_sync():
         disable=False
     )
     return latest_dates
-
-
-

@@ -1,4 +1,4 @@
-FROM python:3.10-alpine as build
+FROM python:3.10-alpine AS build
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
@@ -32,12 +32,11 @@ RUN apk --no-cache add --virtual .build-deps \
     )" \
     && apk add --virtual .rundeps $runDeps \
     && apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* \
+    && chmod +x entrypoint.sh
 
-#RUN adduser --disabled-password --gecos "" --no-create-home customuser && \
-#    chown -R customuser:customuser /usr/src/app && \
-#    chmod -R 775 /usr/src/app
-#
-#USER customuser
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+
+
 
 

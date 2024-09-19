@@ -19,13 +19,7 @@ services:
 
   web:
     image: ghcr.io/rodionmaulenov/timestamp/web-prod:v1.0.0
-    command: /bin/sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000"
-    volumes:
-      - ./static:/usr/src/app/static
-      - ./media:/usr/src/app/media
+    command: gunicorn -w 3 scheduler.wsgi --bind 0.0.0.0:8000
     ports:
       - "8000:8000"
     depends_on:
@@ -33,14 +27,13 @@ services:
       - redis
     env_file:
       - .env
+    environment:
+      - DJANGO_SERVICE=web
 
   celery:
     image: ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
     command: celery -A scheduler worker --loglevel=info
     restart: always
-    volumes:
-      - ./static:/usr/src/app/static
-      - ./media:/usr/src/app/media
     depends_on:
       - web
     env_file:
@@ -49,9 +42,6 @@ services:
   celery-beat:
     image: ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
     command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes:
-      - ./static:/usr/src/app/static
-      - ./media:/usr/src/app/media
     depends_on:
       - web
     env_file:
@@ -68,8 +58,6 @@ services:
     volumes:
       - ./persistentdata/certbot/conf:/etc/letsencrypt
       - ./persistentdata/certbot/www:/var/www/certbot
-      - ./static:/usr/src/app/static
-      - ./media:/usr/src/app/media
 
   certbot:
     image: certbot/certbot
@@ -83,9 +71,6 @@ services:
   telegram:
     image: ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
     command: /bin/sh -c "python schedule/telegram.py"
-    volumes:
-      - ./static:/usr/src/app/static
-      - ./media:/usr/src/app/media
     depends_on:
       - web
     env_file:

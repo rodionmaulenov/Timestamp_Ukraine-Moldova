@@ -1,58 +1,14 @@
 import os
 import re
 from django.db import models
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 COUNTRY_CHOICES = [
-    ('MLD', 'Moldova'),
-    ('UKR', 'Ukraine'),
+    ('MLD', _('Moldova')),
+    ('UKR', _('Ukraine')),
+    ('UZB', _('Uzbekistan')),
 ]
-
-
-class SurrogacyMother(models.Model):
-    name = models.CharField(max_length=255)
-    country_selection = models.CharField(max_length=3, choices=COUNTRY_CHOICES, default='MLD')
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Date(models.Model):
-    surrogacy = models.ForeignKey(SurrogacyMother, on_delete=models.CASCADE, related_name='choose_dates')
-    entry = models.DateField()
-    exit = models.DateField()
-    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
-    disable = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Date instance for {self.surrogacy.name}"
-
-    def save(self, *args, **kwargs):
-        # save country related to mother instance
-        if not self.pk:
-            self.country = self.surrogacy.country_selection
-        super().save(*args, **kwargs)
-
-
-class Ukraine(SurrogacyMother):
-    class Meta:
-        proxy = True
-        verbose_name = 'Ukraine'
-        verbose_name_plural = 'Ukraine'
-
-    def __str__(self):
-        return self.name
-
-
-class Moldova(SurrogacyMother):
-    class Meta:
-        proxy = True
-        verbose_name = 'Moldova'
-        verbose_name_plural = 'Moldova'
-
-    def __str__(self):
-        return self.name
-
 
 def clean_filepath(filename):
     # Define a regular expression pattern to match prohibited characters, including apostrophes
@@ -63,25 +19,72 @@ def clean_filepath(filename):
 
 
 def directory_path(instance, filename):
-    return f'{clean_filepath(instance.mother.name)}/{filename}'
+    return f'{clean_filepath("_".join(instance.name.split()))}/{filename}'
 
 
-class Document(models.Model):
-    mother = models.OneToOneField(SurrogacyMother, on_delete=models.CASCADE)
-    title = models.CharField(max_length=250)
-    created = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to=directory_path)
+class SurrogacyMother(models.Model):
+    name = models.CharField(max_length=255, verbose_name=_('Name'))
+    country_selection = models.CharField(
+        max_length=3,
+        choices=COUNTRY_CHOICES,
+        default='UZB',
+        verbose_name=_('Country Selection')
+    )
+    created = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
+    file = models.FileField(upload_to=directory_path, default='', verbose_name=_('File'))
 
     def __str__(self):
-        # if self is None must return '' because if add new document from inline without '' the error raise
-        return str(self.title).title() if self.title else ''
+        return self.name
 
     def delete(self, *args, **kwargs):
-        # Delete the associated file from the filesystem
-        if self.file and os.path.isfile(self.file.path):
-            os.remove(self.file.path)
-        # Call the superclass delete method
+        if settings.DEBUG:
+            # Delete the associated file from the filesystem
+            if self.file and os.path.isfile(self.file.path):
+                os.remove(self.file.path)
+        else:
+            self.file.delete(save=False)
+
         super().delete(*args, **kwargs)
+
+    class Meta:
+        verbose_name = _('Surrogacy Mother')
+        verbose_name_plural = _('Surrogacy Mothers')
+
+
+class Date(models.Model):
+    surrogacy = models.ForeignKey(SurrogacyMother, on_delete=models.CASCADE, related_name='choose_dates')
+    entry = models.DateField(verbose_name=_('Entry'))
+    exit = models.DateField(verbose_name=_('Exit'))
+    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES, verbose_name=_('Country'))
+    disable = models.BooleanField(default=False, verbose_name=_('Disable'))
+
+    def __str__(self):
+        return f"Range {self.entry} -- {self.exit} for {self.surrogacy.name}"
+
+    class Meta:
+        verbose_name = _('Date')
+        verbose_name_plural = _('Dates')
+
+
+class Ukraine(SurrogacyMother):
+    class Meta:
+        proxy = True
+        verbose_name = _('Ukraine')
+        verbose_name_plural = _('Ukraine')
+
+
+class Moldova(SurrogacyMother):
+    class Meta:
+        proxy = True
+        verbose_name = _('Moldova')
+        verbose_name_plural = _('Moldova')
+
+
+class Uzbekistan(SurrogacyMother):
+    class Meta:
+        proxy = True
+        verbose_name = _('Uzbekistan')
+        verbose_name_plural = _('Uzbekistan')
 
 
 class Message(models.Model):
@@ -94,5 +97,3 @@ class Message(models.Model):
 
     class Meta:
         unique_together = ('chat_id', 'message_id')
-
-

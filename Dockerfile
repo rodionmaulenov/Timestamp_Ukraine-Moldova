@@ -16,7 +16,10 @@ COPY . /usr/src/app/
 
 RUN adduser --disabled-password --gecos "" --no-create-home customuser && \
     chown -R customuser:customuser /usr/src/app && \
-    chmod -R 775 /usr/src/app
+    chmod -R 775 /usr/src/app && \
+    chmod +x entrypoint.sh
 
 USER customuser
+
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 
