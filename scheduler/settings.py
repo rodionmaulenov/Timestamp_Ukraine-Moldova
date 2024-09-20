@@ -94,7 +94,6 @@ if DEBUG:
             'PORT': '5432',
         }
         }
-
 else:
     DATABASES = {
         'default': {
