@@ -6,7 +6,7 @@ if [ "$DJANGO_SERVICE" = "web" ]; then
 
   python manage.py makemigrations
   python manage.py migrate
-  python collectstatic
+  python collectstatic --noinput
 fi
 
 exec "$@"
