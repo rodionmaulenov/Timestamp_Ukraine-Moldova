@@ -40,6 +40,7 @@ services:
       - .env
 
   celery-beat:
+    restart: always
     image: ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
     command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
