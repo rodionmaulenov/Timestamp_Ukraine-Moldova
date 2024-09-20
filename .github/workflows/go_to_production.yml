@@ -22,8 +22,6 @@ jobs:
 
       - name: Building docker images
         run: |
-          # This dir must be on production
-          mkdir -p static
           cd docker_prod
           docker-compose -f docker-compose.cicd.yml build --no-cache
 
