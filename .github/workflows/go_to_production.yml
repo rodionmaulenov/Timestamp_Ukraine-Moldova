@@ -22,6 +22,7 @@ jobs:
 
       - name: Building docker images
         run: |
+          mkdir -p collectstatic
           cd docker_prod
           docker-compose -f docker-compose.cicd.yml build --no-cache
 

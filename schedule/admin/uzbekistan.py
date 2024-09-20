@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 @admin.register(Uzbekistan)
-class OthersAdmin(admin.ModelAdmin):
+class UzbekistanAdmin(admin.ModelAdmin):
     inlines = [DateInline, NewCountryDateInline]
     list_per_page = 15
     ordering = 'created',
