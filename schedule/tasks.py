@@ -5,7 +5,7 @@ from django.utils import timezone
 from celery import shared_task
 import pytz
 import asyncio
-
+from schedule.telegram import chat_id
 from schedule.models import Message
 from schedule.services import get_objs_disable_false, get_random_cat_photo_with_text, calculate_last_disable_dates, \
     calculate_last_disable_dates_sync, make_message_content
@@ -63,13 +63,13 @@ def send_message_to_work_group(self):
             logger.info("Generated message content: %s", message_content)
 
             sent_message = await bot.send_photo(
-                chat_id='-1002171039112',
+                chat_id=chat_id,
                 photo=resized_photo,
                 caption=message_content,
                 parse_mode=ParseMode.MARKDOWN
             )
 
-            await Message.objects.acreate(chat_id='-1002171039112', message_id=sent_message.message_id)
+            await Message.objects.acreate(chat_id=chat_id, message_id=sent_message.message_id)
 
 
             logger.info("Message successfully sent to the Telegram group.")
