@@ -1,13 +1,74 @@
 {% extends "admin/base_site.html" %}
+{% load i18n static %}
 
-{% block branding %}
-    {{ block.super }}
-    <!-- Add your custom language switcher form below the branding -->
-    <form action="{% url 'set_language' %}" method="post">
-        {% csrf_token %}
-        <select name="language" onchange="this.form.submit()">
-            <option value="en-us" {% if LANGUAGE_CODE == 'en-us' %}selected{% endif %}>eng</option>
-            <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>rus</option>
-        </select>
-    </form>
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static 'css/custom_header.css' %}">
+{% endblock %}
+
+
+{% block header %}
+    <div class="header">
+        <div class="items">
+
+            <div class="item-element1">
+                <div class="admin-logo">
+                    <a href="/admin/">
+                        <img src="{% static 'img/R.svg' %}" alt="Logo" class="AppHeader-logo">
+                    </a>
+                </div>
+            </div>
+            <div class="item-element2">
+                <div class="admin-site">
+                    <a href="{% url 'admin:index' %}">admin_panel</a>
+                </div>
+            </div>
+            <!-- Slash between the items -->
+            <span class="slash">/</span>
+            <!-- Slash between the items -->
+            {% if has_permission %}
+                <div class="item-element3">
+                    <div class="tooltip">
+                        <div class="tooltip-element">
+                            {% firstof user.get_short_name user.get_username %}
+                        </div>
+                        <div class="tooltip-info">
+                            <div class="user-name">{% firstof user.get_short_name user.get_username %}</div>
+                            {% if user.has_usable_password %}
+                                <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a>
+                            {% endif %}
+                            <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit">{% translate 'Log out' %}</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <!-- Slash between the items -->
+            <span class="slash">/</span>
+            <!-- Slash between the items -->
+            <div class="item-element4">
+                <div class="language">
+                    <form action="{% url 'set_language' %}" method="post">
+                        {% csrf_token %}
+
+                        <!-- If the current language is English, show the Russian button -->
+                        {% if LANGUAGE_CODE == 'en-us' %}
+                            <button type="submit" name="language" value="ru" class="language-button">
+                                russian
+                            </button>
+                        {% endif %}
+
+                        <!-- If the current language is Russian, show the English button -->
+                        {% if LANGUAGE_CODE == 'ru' %}
+                            <button type="submit" name="language" value="en-us" class="language-button">
+                                english
+                            </button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
 {% endblock %}

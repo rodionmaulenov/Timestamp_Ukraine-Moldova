@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-19 21:05+0300\n"
+"POT-Creation-Date: 2024-09-20 16:47+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -726,6 +726,7 @@ msgstr "Файл"
 
 #: myvenv/lib/python3.10/site-packages/django/db/models/fields/files.py:420
 #: schedule/admin/moldova.py:81 schedule/admin/ukraine.py:83
+#: schedule/admin/uzbekistan.py:41
 msgid "Image"
 msgstr "Изображение"
 
@@ -1564,6 +1565,7 @@ msgstr ""
 "проверить статус на определенную дату."
 
 #: schedule/admin/moldova.py:40 schedule/admin/ukraine.py:40
+#: schedule/inlines.py:41
 msgid "Control date"
 msgstr "Контрольная дата"
 
@@ -1579,13 +1581,31 @@ msgstr "Дней прошло"
 msgid "Days left"
 msgstr "Дней осталось"
 
+#: schedule/admin/uzbekistan.py:39 schedule/inlines.py:94
+msgid "Days"
+msgstr "Всего дней"
+
 #: schedule/apps.py:7
 msgid "schedule"
 msgstr "График приездов-отъездов"
 
-#: schedule/inlines.py:85
-msgid "Days"
-msgstr "Всего дней"
+#: schedule/inlines.py:26
+msgid "Define date"
+msgstr "Определить дату"
+
+#: schedule/inlines.py:27
+msgid "Define dates"
+msgstr "Определить даты"
+
+#: schedule/inlines.py:42
+msgid "Control dates"
+msgstr "Контрольная дата"
+
+#: schedule/inlines.py:46
+#, fuzzy
+#| msgid "Currently"
+msgid "Current date"
+msgstr "Текущая дата"
 
 #: schedule/models.py:8 schedule/models.py:79 schedule/models.py:80
 msgid "Moldova"
@@ -1605,7 +1625,7 @@ msgstr "Имя"
 
 #: schedule/models.py:31
 msgid "Country Selection"
-msgstr "Выбранная страна"
+msgstr "Cтрана"
 
 #: schedule/models.py:33
 msgid "Created"

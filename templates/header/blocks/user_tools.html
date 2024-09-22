@@ -1,0 +1,23 @@
+{% load i18n static %}
+
+{% if has_permission %}
+    <div id="user-tools" class="profile-container">
+        <a href="#" class="profile-link">
+            {% block welcome-msg %}
+                {% firstof user.get_short_name user.get_username %}
+            {% endblock %}
+        </a>
+        
+        <!-- Move the hover-card inside user-tools -->
+        <div id="hover-card">
+            <div id="user-name">{% firstof user.get_short_name user.get_username %}</div>
+            {% if user.has_usable_password %}
+                <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a>
+            {% endif %}
+            <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+                {% csrf_token %}
+                <button type="submit">{% translate 'Log out' %}</button>
+            </form>
+        </div>
+    </div>
+{% endif %}

@@ -23,6 +23,8 @@ class NewCountryDateInline(TabularInline):
     radio_fields = {"country": admin.HORIZONTAL}
     model = Date
     max_num = 2
+    verbose_name = _("Define date")
+    verbose_name_plural = _("Define dates")
 
     def get_queryset(self, request):
         """
@@ -30,27 +32,19 @@ class NewCountryDateInline(TabularInline):
         """
         return Date.objects.none()
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 class DateInline(TabularInline):
     extra = 0
-    fields = ['entry', 'exit', 'disable', 'calculate_days']
+    fields = ['entry', 'exit', 'disable', 'calculate_days', 'country']
     readonly_fields = ['calculate_days']
+    radio_fields = {"country": admin.HORIZONTAL}
     model = Date
-
-    def get_max_num(self, request, obj=None, **kwargs):
-        """
-        Allow adding only one new form at a time, and hide existing ones.
-        """
-        if obj:
-            if 'moldova' in request.path.split('/'):
-                return len(obj.choose_dates.filter(country='MLD')) + 1
-
-            if 'ukraine' in request.path.split('/'):
-                return len(obj.choose_dates.filter(country='UKR')) + 1
-
-            if 'uzbekistan' in request.path.split('/'):
-                return len(obj.choose_dates.filter(country='UZB')) + 1
-        return 1
+    verbose_name = _("Control date")
+    verbose_name_plural = _("Control dates")
+    max_num = 1
 
     class Media:
 
@@ -81,5 +75,8 @@ class DateInline(TabularInline):
 
                 return (exit - entry).days + 1
         return '-'
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
     calculate_days.short_description = _('Days')

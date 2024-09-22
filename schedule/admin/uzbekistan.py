@@ -1,5 +1,7 @@
+from datetime import datetime
+import pytz
 from django.contrib import admin
-
+from django.utils.html import format_html
 from schedule.inlines import NewCountryDateInline, DateInline
 from schedule.models import Uzbekistan, SurrogacyMother, Date
 from django.utils.translation import gettext_lazy as _
@@ -10,13 +12,57 @@ class UzbekistanAdmin(admin.ModelAdmin):
     inlines = [DateInline, NewCountryDateInline]
     list_per_page = 15
     ordering = 'created',
-    search_fields = 'name', 'country_selection'
-    readonly_fields = 'country_selection',
-    list_display = 'name',
+    search_fields = 'name', 'country'
+    readonly_fields = 'country',
+    list_display = 'name', 'get_html_photo', 'calculate_days', 'country'
+
+    class Media:
+        css = {
+            'all': ('css/image_scale.css',)
+        }
+        js = 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js', 'js/shortenTextInTag.js',
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
     def get_queryset(self, request):
-        return SurrogacyMother.objects.filter(country_selection='UZB')
+        return SurrogacyMother.objects.filter(country='UZB')
 
+    def calculate_days(self, obj):
+
+        if obj is not None:
+            last_date = Date.objects.filter(surrogacy_id=obj.id, country='UZB').order_by('-exit').first()
+
+            if last_date:
+                kiev_tz = pytz.timezone('Europe/Kiev')
+
+                date_time = datetime.combine(last_date.exit, datetime.min.time())
+                exit = kiev_tz.localize(date_time)
+
+                date_time = datetime.combine(last_date.entry, datetime.min.time())
+                entry = kiev_tz.localize(date_time)
+
+                return (exit - entry).days + 1
+        return '-'
+
+    calculate_days.short_description = _('Days')
+
+    @admin.action(description=_('Image'))
+    def get_html_photo(self, obj):
+        if obj.file:
+            file_url = obj.file.url
+
+            if file_url.endswith('.pdf'):
+                return '-'
+            else:
+                return format_html(
+                    """
+                    <div class='image-container'>
+                        <img src='{}' class='hoverable-image' />
+                    </div>
+                    """, file_url
+                )
+        return '-'
 
     def save_related(self, request, form, formsets, change):
         """
@@ -38,13 +84,12 @@ class UzbekistanAdmin(admin.ModelAdmin):
                             # Use the country selected in the inline form
                             date_instance.country = cleaned_data['country']
 
-                            surrogacy_instance.country_selection = cleaned_data['country']
+                            surrogacy_instance.country = cleaned_data['country']
                             surrogacy_instance.save()
                         else:
-                            # Default to the parent's country_selection if no country is selected in the inline
-                            date_instance.country = surrogacy_instance.country_selection
+                            # Default to the parent's country if no country is selected in the inline
+                            date_instance.country = surrogacy_instance.country
 
                         date_instance.save()
 
         super().save_related(request, form, formsets, change)
-

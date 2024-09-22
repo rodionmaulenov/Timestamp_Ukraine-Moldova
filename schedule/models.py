@@ -24,11 +24,11 @@ def directory_path(instance, filename):
 
 class SurrogacyMother(models.Model):
     name = models.CharField(max_length=255, verbose_name=_('Name'))
-    country_selection = models.CharField(
+    country = models.CharField(
         max_length=3,
         choices=COUNTRY_CHOICES,
         default='UZB',
-        verbose_name=_('Country Selection')
+        verbose_name=_('Country')
     )
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
     file = models.FileField(upload_to=directory_path, default='', verbose_name=_('File'))

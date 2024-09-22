@@ -1,0 +1,28 @@
+{% load i18n static %}
+
+<header id="header">
+
+    <div id="branding">
+        {% block branding %}
+            {% include "header/blocks/branding.html" %}
+        {% endblock %}
+    </div>
+
+    {% block usertools %}
+        {% include "header/blocks/user_tools.html" %}
+    {% endblock %}
+
+    <div>/</div>
+
+    <div id="language">
+        <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            <select name="language" onchange="this.form.submit()">
+                <option value="en-us" {% if LANGUAGE_CODE == 'en-us' %}selected{% endif %}>english</option>
+                <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>russian</option>
+            </select>
+        </form>
+    </div>
+
+
+</header>

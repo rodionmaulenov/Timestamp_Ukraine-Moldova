@@ -23,8 +23,8 @@ class MoldovaAdmin(admin.ModelAdmin):
     )
     list_per_page = 15
     ordering = 'created',
-    search_fields = 'name', 'country_selection'
-    readonly_fields = 'country_selection',
+    search_fields = 'name', 'country'
+    readonly_fields = 'country',
     inlines = [DateInline, NewCountryDateInline]
     list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date', "control_date",
 
@@ -35,7 +35,7 @@ class MoldovaAdmin(admin.ModelAdmin):
         js = 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js',
 
     def get_queryset(self, request):
-        return SurrogacyMother.objects.filter(country_selection='MLD')
+        return SurrogacyMother.objects.filter(country='MLD')
 
     @admin.action(description=_('Control date'))
     def control_date(self, obj):
@@ -46,7 +46,7 @@ class MoldovaAdmin(admin.ModelAdmin):
 
         kiev_tz = pytz.timezone('Europe/Kiev')
 
-        date_obj = obj.choose_dates.filter(country=obj.country_selection).order_by('-id').first()
+        date_obj = obj.choose_dates.filter(country=obj.country).order_by('-id').first()
 
         if date_obj is not None:
             control_date = date_obj.exit
@@ -59,7 +59,7 @@ class MoldovaAdmin(admin.ModelAdmin):
     @admin.action(description=_('Days have passed'))
     def get_days_spent(self, obj):
 
-        date_obj = obj.choose_dates.filter(country=obj.country_selection).order_by('-id').first()
+        date_obj = obj.choose_dates.filter(country=obj.country).order_by('-id').first()
 
         if date_obj is not None:
             control_date = date_obj.exit
@@ -70,7 +70,7 @@ class MoldovaAdmin(admin.ModelAdmin):
     @admin.action(description=_('Days left'))
     def get_days_exist(self, obj):
 
-        date_obj = obj.choose_dates.filter(country=obj.country_selection).order_by('-id').first()
+        date_obj = obj.choose_dates.filter(country=obj.country).order_by('-id').first()
         if date_obj is not None:
             control_date = date_obj.exit
 
@@ -136,11 +136,11 @@ class MoldovaAdmin(admin.ModelAdmin):
                             # Use the country selected in the inline form
                             date_instance.country = cleaned_data['country']
 
-                            surrogacy_instance.country_selection = cleaned_data['country']
+                            surrogacy_instance.country = cleaned_data['country']
                             surrogacy_instance.save()
                         else:
-                            # Default to the parent's country_selection if no country is selected in the inline
-                            date_instance.country = surrogacy_instance.country_selection
+                            # Default to the parent's country if no country is selected in the inline
+                            date_instance.country = surrogacy_instance.country
 
                         date_instance.save()
 
