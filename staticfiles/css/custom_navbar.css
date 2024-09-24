@@ -1,0 +1,91 @@
+.navbar {
+    display: block;
+    unicode-bidi: isolate;
+    border: 1px solid black;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    font-size: 13px;
+    color: #1f2328;
+    background-color: #f6f8fa;
+}
+
+.navbar-elements {
+    display: flex;
+    align-content: flex-start;
+    flex-wrap: nowrap;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.list-elements {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 10px;
+    list-style: none;
+}
+
+
+.element {
+    display: flex;
+    align-items: center;
+    height: 80%;
+}
+
+
+/*.navbar {*/
+/*    display: flex;*/
+/*    align-items: flex-start;*/
+/*    border: 1px solid black;*/
+/*    background-color: #f6f8fa;*/
+/*}*/
+
+/*.custom-breadcrumbs {*/
+/*    background-color: #f6f8fa;*/
+/*    display: flex;*/
+/*    flex-wrap: nowrap;*/
+/*    align-items: center;*/
+/*    height: 100%;*/
+/*}*/
+
+/*.list-segments {*/
+/*    gap: 30px;*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    padding: 0;*/
+/*    margin: 0;*/
+/*    height: 100%;*/
+/*}*/
+
+/*.segments {*/
+/*    list-style-type: none;*/
+/*}*/
+
+/*.breadcrumb-link {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    gap: 3px;*/
+/*    text-decoration: none;*/
+/*}*/
+
+/*.breadcrumb-link svg {*/
+/*    fill: #1f2328;*/
+/*    width: 12px;*/
+/*    height: 12px;*/
+/*}*/
+
+/*.breadcrumb-link span {*/
+/*    color: #1f2328;*/
+/*}*/
+
+/*.bold-link span {*/
+/*    font-weight: 600; !* Make the text bold when it's the only link *!*/
+/*    color: #1f2328; !* You can also customize the color *!*/
+/*}*/
+
+/*.breadcrumb-link span {*/
+/*    font-weight: normal; !* Normal text weight for other links *!*/
+/*}*/
+

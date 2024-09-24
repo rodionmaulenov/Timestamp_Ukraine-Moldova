@@ -6,17 +6,15 @@
 .header {
     display: flex;
     justify-content: flex-start;
-    align-items: center;
-    flex-direction: row;
-    height: 80px;
-    min-height: 80px;
+    flex-wrap: nowrap;
+    height: 60px;
+    min-height: 60px;
     padding: 0 10px; /* Added padding to the header container */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    font-size: 14px;
+    font-size: 13px;
     color: #1f2328;
     background-color: #f6f8fa;
     line-height: 1.5;
-    flex-wrap: nowrap;
 }
 
 .header .slash {
@@ -158,8 +156,8 @@
     all: unset; /* Resets all inherited styles */
     color: #1f2328;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-    font-size: 14px;
-    text-transform: none
+    font-size: 13px;
+    text-transform: none;
 }
 
 .tooltip-info a:hover {
@@ -170,8 +168,9 @@
     all: unset; /* Resets all inherited styles */
     color: #1f2328 !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
     text-transform: none !important;
+    font-weight: 400 !important; /* Ensure font-weight is normal (not bold) */
 }
 
 .tooltip-info form button:hover {
@@ -205,7 +204,6 @@
     color: #1f2328;
     padding: 6px 6px;
 }
-
 
 /* End Language toggle */
 

@@ -7,11 +7,22 @@ from schedule.models import Uzbekistan, SurrogacyMother, Date
 from django.utils.translation import gettext_lazy as _
 
 
+@admin.register(SurrogacyMother)
+class AutocompleteMotherAdmin(admin.ModelAdmin):
+    ordering = ['-created']
+    search_fields = ['name']
+
+    def has_module_permission(self, request):
+        # Return False to hide this model from the admin dashboard
+        return False
+
+
 @admin.register(Uzbekistan)
 class UzbekistanAdmin(admin.ModelAdmin):
+    autocomplete_fields = 'related_mother',
     inlines = [DateInline, NewCountryDateInline]
     list_per_page = 15
-    ordering = 'created',
+    ordering = '-created',
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     list_display = 'name', 'get_html_photo', 'calculate_days', 'country'
@@ -22,14 +33,36 @@ class UzbekistanAdmin(admin.ModelAdmin):
         }
         js = 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js', 'js/shortenTextInTag.js',
 
-    def has_delete_permission(self, request, obj=None):
-        return False
+    def get_inline_instances(self, request, obj=None):
+        inline_instances = []
+
+        if obj is None:
+            for inline_class in [NewCountryDateInline]:
+                inline_instance = inline_class(self.model, self.admin_site)
+                inline_instances.append(inline_instance)
+        else:
+            for inline_class in self.inlines:
+                inline_instance = inline_class(self.model, self.admin_site)
+                inline_instances.append(inline_instance)
+
+        return inline_instances
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        if search_term:
+            queryset = queryset.filter(name__icontains=search_term)
+        return queryset, use_distinct
+
+    def get_fields(self, request, obj=None):
+        if obj:
+            return ['name', 'file', 'country']
+        else:
+            return ['name', 'related_mother', 'file']
 
     def get_queryset(self, request):
         return SurrogacyMother.objects.filter(country='UZB')
 
     def calculate_days(self, obj):
-
         if obj is not None:
             last_date = Date.objects.filter(surrogacy_id=obj.id, country='UZB').order_by('-exit').first()
 
@@ -93,3 +126,21 @@ class UzbekistanAdmin(admin.ModelAdmin):
                         date_instance.save()
 
         super().save_related(request, form, formsets, change)
+
+    def save_model(self, request, obj, form, change):
+
+        if not change and obj.related_mother:
+            related_mother = obj.related_mother
+
+            super().save_model(request, obj, form, change)
+
+            for date_obj in related_mother.choose_dates.all():
+                Date.objects.create(surrogacy=obj,
+                                    entry=date_obj.entry,
+                                    exit=date_obj.exit,
+                                    country=date_obj.country,
+                                    disable=date_obj.disable
+                                    )
+
+        else:
+            super().save_model(request, obj, form, change)

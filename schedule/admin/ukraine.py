@@ -22,7 +22,7 @@ class UkraineAdmin(admin.ModelAdmin):
         "4. <b>Control date</b>: Allows you to check the status for a specific date.")
     )
     list_per_page = 15
-    ordering = 'created',
+    ordering = '-created',
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = [DateInline, NewCountryDateInline]
@@ -33,6 +33,12 @@ class UkraineAdmin(admin.ModelAdmin):
             'all': ('css/image_scale.css',)
         }
         js = 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js', 'js/preventSubmit.js'
+
+    def get_fields(self, request, obj=None):
+        if obj:
+            return ['name', 'file', 'country']
+        else:
+            return ['name', 'related_mother', 'file']
 
     def get_queryset(self, request):
         return SurrogacyMother.objects.filter(country='UKR')

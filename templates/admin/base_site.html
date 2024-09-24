@@ -1,74 +1,63 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
+{% load breadcrumb_tags %}
 
 {% block extrastyle %}
     <link rel="stylesheet" href="{% static 'css/custom_header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom_navbar.css' %}">
 {% endblock %}
 
 
 {% block header %}
-    <div class="header">
-        <div class="items">
+    {% include 'header/custom_header.html' %}
+{% endblock %}
 
-            <div class="item-element1">
-                <div class="admin-logo">
-                    <a href="/admin/">
-                        <img src="{% static 'img/R.svg' %}" alt="Logo" class="AppHeader-logo">
-                    </a>
-                </div>
-            </div>
-            <div class="item-element2">
-                <div class="admin-site">
-                    <a href="{% url 'admin:index' %}">admin_panel</a>
-                </div>
-            </div>
-            <!-- Slash between the items -->
-            <span class="slash">/</span>
-            <!-- Slash between the items -->
-            {% if has_permission %}
-                <div class="item-element3">
-                    <div class="tooltip">
-                        <div class="tooltip-element">
-                            {% firstof user.get_short_name user.get_username %}
-                        </div>
-                        <div class="tooltip-info">
-                            <div class="user-name">{% firstof user.get_short_name user.get_username %}</div>
-                            {% if user.has_usable_password %}
-                                <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a>
+{% block nav-breadcrumbs %}
+    <div class="navbar">
+        <div class="navbar-elements">
+            <ul class="list-elements">
+                {% with breadcrumb_url='/admin' %}
+                    {% with request.path|split_path as segments %}
+                        {% for segment in segments %}
+                            {% if forloop.first %}
+                                <!-- First segment: Home -->
+                                <li class="element">
+                                    <a href="{% url 'admin:index' %}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                             fill="currentColor"
+                                             class="bi bi-sign-turn-left" viewBox="0 0 16 16">
+                                            <path d="M11 8.5A2.5 2.5 0 0 0 8.5 6H7V4.534a.25.25 0 0 0-.41-.192L4.23 6.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 7 8.466V7h1.5A1.5 1.5 0 0 1 10 8.5V11h1z"/>
+                                            <path fill-rule="evenodd"
+                                                  d="M6.95.435c.58-.58 1.52-.58 2.1 0l6.515 6.516c.58.58.58 1.519 0 2.098L9.05 15.565c-.58.58-1.519.58-2.098 0L.435 9.05a1.48 1.48 0 0 1 0-2.098zm1.4.7a.495.495 0 0 0-.7 0L1.134 7.65a.495.495 0 0 0 0 .7l6.516 6.516a.495.495 0 0 0 .7 0l6.516-6.516a.495.495 0 0 0 0-.7L8.35 1.134Z"/>
+                                        </svg>
+                                        <span>{% translate 'Home' %}</span>
+                                    </a>
+                                </li>
+                            {% elif forloop.counter != 3 and forloop.counter != 4 %}
+                                <!-- Skip segments 3 and 4 -->
+                                {% with breadcrumb_url=breadcrumb_url|add:'/'|add:segment %}
+                                    <li class="element">
+                                        <a href="{{ breadcrumb_url }}/" class="breadcrumb-link">
+                                            <span>{{ segment|capfirst }}</span>
+                                        </a>
+                                    </li>
+                                {% endwith %}
+                            {% elif forloop.last  and  forloop.counter > 2  %}
+                                <!-- Handle last segment as static, no link -->
+                                {% with breadcrumb_url=breadcrumb_url|add:'/'|add:segment %}
+                                    <li class="element">
+                                        <span>{{ segment|capfirst }}</span>
+                                    </li>
+                                {% endwith %}
                             {% endif %}
-                            <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
-                                {% csrf_token %}
-                                <button type="submit">{% translate 'Log out' %}</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-            <!-- Slash between the items -->
-            <span class="slash">/</span>
-            <!-- Slash between the items -->
-            <div class="item-element4">
-                <div class="language">
-                    <form action="{% url 'set_language' %}" method="post">
-                        {% csrf_token %}
-
-                        <!-- If the current language is English, show the Russian button -->
-                        {% if LANGUAGE_CODE == 'en-us' %}
-                            <button type="submit" name="language" value="ru" class="language-button">
-                                russian
-                            </button>
-                        {% endif %}
-
-                        <!-- If the current language is Russian, show the English button -->
-                        {% if LANGUAGE_CODE == 'ru' %}
-                            <button type="submit" name="language" value="en-us" class="language-button">
-                                english
-                            </button>
-                        {% endif %}
-                    </form>
-                </div>
-            </div>
-
+                        {% endfor %}
+                    {% endwith %}
+                {% endwith %}
+            </ul>
         </div>
     </div>
 {% endblock %}
+
+
+
+

@@ -33,6 +33,14 @@ class SurrogacyMother(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
     file = models.FileField(upload_to=directory_path, default='', verbose_name=_('File'))
 
+    related_mother = models.ForeignKey(
+        'self',  # Refers to the same model (SurrogacyMother)
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_('Related Mother')
+    )
+
     def __str__(self):
         return self.name
 
