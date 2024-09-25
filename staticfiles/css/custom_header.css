@@ -67,7 +67,7 @@
     background-color: #ebedf0;
     color: #1f2328;
     font-weight: 600;
-    padding: 6px 6px;
+    padding: 4px 4px;
 }
 
 /* End Admin site link */
@@ -89,13 +89,13 @@
     text-decoration: none;
     background-color: #ebedf0;
     color: #1f2328;
-    padding: 6px 6px;
+    padding: 4px 4px;
 }
 
 .tooltip:hover .tooltip-element, .tooltip:focus-within .tooltip-element {
     background-color: #ebedf0;
     color: #1f2328;
-    padding: 6px 6px;
+    padding: 4px 4px;
 }
 
 .tooltip-info {
@@ -202,7 +202,7 @@
     text-decoration: none;
     background-color: #ebedf0;
     color: #1f2328;
-    padding: 6px 6px;
+    padding: 4px 4px;
 }
 
 /* End Language toggle */

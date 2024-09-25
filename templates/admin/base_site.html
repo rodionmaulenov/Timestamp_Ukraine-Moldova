@@ -16,47 +16,61 @@
     <div class="navbar">
         <div class="navbar-elements">
             <ul class="list-elements">
-                {% with breadcrumb_url='/admin' %}
-                    {% with request.path|split_path as segments %}
-                        {% for segment in segments %}
-                            {% if forloop.first %}
-                                <!-- First segment: Home -->
-                                <li class="element">
-                                    <a href="{% url 'admin:index' %}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                                             fill="currentColor"
-                                             class="bi bi-sign-turn-left" viewBox="0 0 16 16">
-                                            <path d="M11 8.5A2.5 2.5 0 0 0 8.5 6H7V4.534a.25.25 0 0 0-.41-.192L4.23 6.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 7 8.466V7h1.5A1.5 1.5 0 0 1 10 8.5V11h1z"/>
-                                            <path fill-rule="evenodd"
-                                                  d="M6.95.435c.58-.58 1.52-.58 2.1 0l6.515 6.516c.58.58.58 1.519 0 2.098L9.05 15.565c-.58.58-1.519.58-2.098 0L.435 9.05a1.48 1.48 0 0 1 0-2.098zm1.4.7a.495.495 0 0 0-.7 0L1.134 7.65a.495.495 0 0 0 0 .7l6.516 6.516a.495.495 0 0 0 .7 0l6.516-6.516a.495.495 0 0 0 0-.7L8.35 1.134Z"/>
-                                        </svg>
-                                        <span>{% translate 'Home' %}</span>
-                                    </a>
-                                </li>
-                            {% elif forloop.counter != 3 and forloop.counter != 4 %}
-                                <!-- Skip segments 3 and 4 -->
-                                {% with breadcrumb_url=breadcrumb_url|add:'/'|add:segment %}
-                                    <li class="element">
-                                        <a href="{{ breadcrumb_url }}/" class="breadcrumb-link">
-                                            <span>{{ segment|capfirst }}</span>
-                                        </a>
-                                    </li>
-                                {% endwith %}
-                            {% elif forloop.last  and  forloop.counter > 2  %}
-                                <!-- Handle last segment as static, no link -->
-                                {% with breadcrumb_url=breadcrumb_url|add:'/'|add:segment %}
-                                    <li class="element">
-                                        <span>{{ segment|capfirst }}</span>
-                                    </li>
-                                {% endwith %}
+                {% generate_breadcrumbs request as breadcrumbs %}
+                {% for breadcrumb in breadcrumbs %}
+                    {% if forloop.first %}
+                        <!-- Home link -->
+                        <li class="element">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                 fill="currentColor" class="bi bi-houses" viewBox="0 0 16 16">
+                                <path d="M5.793 1a1 1 0 0 1 1.414 0l.647.646a.5.5 0 1 1-.708.708L6.5 1.707 2 6.207V12.5a.5.5 0 0 0 .5.5.5.5 0 0 1 0 1A1.5 1.5 0 0 1 1 12.5V7.207l-.146.147a.5.5 0 0 1-.708-.708zm3 1a1 1 0 0 1 1.414 0L12 3.793V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v3.293l1.854 1.853a.5.5 0 0 1-.708.708L15 8.207V13.5a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 4 13.5V8.207l-.146.147a.5.5 0 1 1-.708-.708zm.707.707L5 7.207V13.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5V7.207z"/>
+                            </svg>
+                            <a href="{{ breadcrumb.url }}" class="first">
+                                <span>{{ breadcrumb.name }}</span>
+                            </a>
+                        </li>
+                    {% elif forloop.last %}
+                        <!-- Last breadcrumb as plain text -->
+                        <li class="element last-element">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                 fill="currentColor" class="bi bi-activity" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                      d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2"/>
+                            </svg>
+                            <a class="last">
+                                <span>{{ breadcrumb.name }}</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <!-- Other breadcrumb links -->
+                        <li class="element">
+                            {% if forloop.counter0|divisibleby:2 %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                     class="bi bi-view-list" viewBox="0 0 16 16">
+                                    <path d="M3 4.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2m0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1zM1 2a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 2m0 12a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 14"/>
+                                </svg>
+                            {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                     fill="currentColor" class="bi bi-code" viewBox="0 0 16 16">
+                                    <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8z"/>
+                                </svg>
                             {% endif %}
-                        {% endfor %}
-                    {% endwith %}
-                {% endwith %}
+                            <a href="{{ breadcrumb.url }}" class="breadcrumb-link">
+                                <span>{{ breadcrumb.name }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
             </ul>
         </div>
     </div>
 {% endblock %}
+
+
+
+
+
+
 
 
 
