@@ -32,13 +32,13 @@ def update_exit_field():
         latest_dates.update(exit=day_today)
 
 
-@shared_task(bind=True, max_retries=10, default_retry_delay=60)  # )
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_message_to_work_group(self):
     async def async_send_message():
         try:
             logger.info("Starting the process of sending a message to the work group.")
             try:
-                message = await sync_to_async(lambda : Message.objects.all().last())()
+                message = await sync_to_async(lambda: Message.objects.all().last())()
 
                 if message:
                     await bot.delete_message(chat_id=message.chat_id, message_id=message.message_id)
@@ -70,7 +70,6 @@ def send_message_to_work_group(self):
             )
 
             await Message.objects.acreate(chat_id=chat_id, message_id=sent_message.message_id)
-
 
             logger.info("Message successfully sent to the Telegram group.")
         except Exception as e:
