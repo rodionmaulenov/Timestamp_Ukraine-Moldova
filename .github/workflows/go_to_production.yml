@@ -88,6 +88,9 @@ jobs:
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << EOF
             cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
           
+            docker stop $(docker ps -aq)
+            docker rm -f $(docker ps -aq)
+            docker rmi $(docker images -q) --force
             docker volume rm $(docker volume ls -q | grep -v timestamp_app_postgres_data) --force
 
             echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
