@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 async def get_random_cat_photo_with_text():
     logger.info("Fetching a random cat photo with text.")
 
-    hello_texts = ["Hello", "Hola", "Bonjour", "Hallo", "Ciao", "Привет", "ПивПив", "МяоКокао",
-                   "Raxmat Shimkentskie", "Bolshe Valericha", "Chistim zybu", "Xvatit boltat",
-                   "Alo garag", "Parvana sroki goryat", "Ainura i gdu UZI", "Gad idi suda"]
+    hello_texts = ["Kairat kogda v office?", "Hello", "Bonjour", "Привет", "ПивПив", "МяоКокао", "Raxmat Shimkentskie", "Bolshe Valericha",
+                   "Chistim zybu", "Xvatit boltat", "Alo garag", "Parvana sroki goryat", "Ainura i gdu UZI",
+                   "Gad idi suda"]
 
-    colors = ["red", "green", "blue", "yellow", "white", "orange", "pink"]
+    colors = ["green", "blue", "yellow", "white", "orange", "pink"]
 
     font_size = 63
     font_color = random.choice(colors)
@@ -79,7 +79,7 @@ def calculate_dates(instance, control_date):
         surrogacy_id=instance.id,
         entry__lte=control_date.date(),
         exit__gte=beginning_180_days.date(),
-        country=instance.country_selection
+        country=instance.country
     )
 
     # Iterate through each date record
@@ -124,14 +124,14 @@ def get_objs_disable_false(latest_dates):
         days_left, total_days_stayed = calculate_dates(obj, date.exit)
 
         if days_left <= 10:
-            if obj.country_selection == 'UKR':
+            if obj.country == 'UKR':
                 patients_ukr_10[date.surrogacy.name] = [days_left, total_days_stayed]
 
             else:
                 patients_mld_10[date.surrogacy.name] = [days_left, total_days_stayed]
 
         if 11 < days_left <= 30:
-            if obj.country_selection == 'UKR':
+            if obj.country == 'UKR':
                 patients_ukr[date.surrogacy.name] = [days_left, total_days_stayed]
             else:
                 patients_mld[date.surrogacy.name] = [days_left, total_days_stayed]

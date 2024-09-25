@@ -49,16 +49,29 @@ INSTALLED_APPS = [
     'storages',
 ]
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+if DEBUG:
+    MIDDLEWARE = [
+        'scheduler.middleware.RemoveCOOPMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
+else:
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
 
 ROOT_URLCONF = 'scheduler.urls'
 
@@ -183,6 +196,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 if DEBUG:
     STATIC_URL = '/static/'
     STATIC_ROOT = BASE_DIR / 'static'
+    STATICFILES_DIRS = [
+        BASE_DIR / 'staticfiles',
+    ]
 
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
@@ -198,6 +214,9 @@ else:
     # Static files (CSS, JavaScript, images)
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
     STATIC_ROOT = BASE_DIR / 'static'
+    STATICFILES_DIRS = [
+        BASE_DIR / 'staticfiles',
+    ]
 
     # Media files (User uploads)
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'

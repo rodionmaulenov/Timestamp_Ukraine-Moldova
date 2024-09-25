@@ -1,13 +1,77 @@
 {% extends "admin/base_site.html" %}
+{% load i18n static %}
+{% load breadcrumb_tags %}
 
-{% block branding %}
-    {{ block.super }}
-    <!-- Add your custom language switcher form below the branding -->
-    <form action="{% url 'set_language' %}" method="post">
-        {% csrf_token %}
-        <select name="language" onchange="this.form.submit()">
-            <option value="en-us" {% if LANGUAGE_CODE == 'en-us' %}selected{% endif %}>eng</option>
-            <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>rus</option>
-        </select>
-    </form>
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static 'css/custom_header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom_navbar.css' %}">
 {% endblock %}
+
+
+{% block header %}
+    {% include 'header/custom_header.html' %}
+{% endblock %}
+
+{% block nav-breadcrumbs %}
+    <div class="navbar">
+        <div class="navbar-elements">
+            <ul class="list-elements">
+                {% generate_breadcrumbs request as breadcrumbs %}
+                {% for breadcrumb in breadcrumbs %}
+                    {% if forloop.first %}
+                        <!-- Home link -->
+                        <li class="element">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                 fill="currentColor" class="bi bi-houses" viewBox="0 0 16 16">
+                                <path d="M5.793 1a1 1 0 0 1 1.414 0l.647.646a.5.5 0 1 1-.708.708L6.5 1.707 2 6.207V12.5a.5.5 0 0 0 .5.5.5.5 0 0 1 0 1A1.5 1.5 0 0 1 1 12.5V7.207l-.146.147a.5.5 0 0 1-.708-.708zm3 1a1 1 0 0 1 1.414 0L12 3.793V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v3.293l1.854 1.853a.5.5 0 0 1-.708.708L15 8.207V13.5a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 4 13.5V8.207l-.146.147a.5.5 0 1 1-.708-.708zm.707.707L5 7.207V13.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5V7.207z"/>
+                            </svg>
+                            <a href="{{ breadcrumb.url }}" class="first">
+                                <span>{{ breadcrumb.name }}</span>
+                            </a>
+                        </li>
+                    {% elif forloop.last %}
+                        <!-- Last breadcrumb as plain text -->
+                        <li class="element last-element">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                 fill="currentColor" class="bi bi-activity" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                      d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2"/>
+                            </svg>
+                            <a class="last">
+                                <span>{{ breadcrumb.name }}</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <!-- Other breadcrumb links -->
+                        <li class="element">
+                            {% if forloop.counter0|divisibleby:2 %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                     class="bi bi-view-list" viewBox="0 0 16 16">
+                                    <path d="M3 4.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2m0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1zM1 2a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 2m0 12a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 14"/>
+                                </svg>
+                            {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                     fill="currentColor" class="bi bi-code" viewBox="0 0 16 16">
+                                    <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8z"/>
+                                </svg>
+                            {% endif %}
+                            <a href="{{ breadcrumb.url }}" class="breadcrumb-link">
+                                <span>{{ breadcrumb.name }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+

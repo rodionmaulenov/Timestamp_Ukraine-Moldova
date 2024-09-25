@@ -85,8 +85,10 @@ jobs:
 
       - name: Pull Docker images and Get ssl key
         run: |
-          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << EOF
             cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
+          
+            docker volume rm $(docker volume ls -q | grep -v timestamp_app_postgres_data) --force
 
             echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
 
@@ -101,6 +103,6 @@ jobs:
 
       - name: Remove <none> Docker images
         run: |
-          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << 'EOF'
+          ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << EOF
             docker images -f "dangling=true" -q | xargs -r docker rmi -f
           EOF
