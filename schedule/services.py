@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 async def get_random_cat_photo_with_text():
     logger.info("Fetching a random cat photo with text.")
 
-    hello_texts = ["Kairat kogda v office?", "Hello", "Bonjour", "Привет", "ПивПив", "МяоКокао", "Raxmat Shimkentskie", "Bolshe Valericha",
+    hello_texts = ["Kairat kogda v office?", "Hello", "Bonjour", "Привет", "ПивПив", "МяоКокао", "Raxmat Shimkentskie",
+                   "Bolshe Valericha",
                    "Chistim zybu", "Xvatit boltat", "Alo garag", "Parvana sroki goryat", "Ainura i gdu UZI",
                    "Gad idi suda"]
 
@@ -116,8 +117,10 @@ def get_objs_disable_false(latest_dates):
 
     patients_ukr = {}
     patients_mld = {}
+    patients_uzb = {}
     patients_ukr_10 = {}
     patients_mld_10 = {}
+    patients_uzb_days = {}
     for date in latest_dates:
         obj = date.surrogacy
 
@@ -135,6 +138,9 @@ def get_objs_disable_false(latest_dates):
                 patients_ukr[date.surrogacy.name] = [days_left, total_days_stayed]
             else:
                 patients_mld[date.surrogacy.name] = [days_left, total_days_stayed]
+
+        if obj.country == 'UZB':
+            patients_uzb[date.surrogacy.name] = total_days_stayed
 
     days_10_left_ukr = [
         f'{convert_number_to_emoji(index)}. *Name:* {k} *Days left:* {v[0]}  *Days passed:* {v[1]}\n'
@@ -160,20 +166,29 @@ def get_objs_disable_false(latest_dates):
         enumerate(sorted(patients_mld.items(), key=lambda item: item[1][0]), start=1)
     ]
 
+    patients_uzb_days = [
+        f'{convert_number_to_emoji(index)}. *Name:* {k} *Days passed:* {v}\n'
+        for index, (k, v) in
+        enumerate(sorted(patients_mld.items(), key=lambda item: item[1][0]), start=1)
+    ]
+
     result = [(''.join(days_10_left_ukr), ''.join(days_30_left_ukr)),
-              (''.join(days_10_left_mld), ''.join(days_30_left_mld))]
+              (''.join(days_10_left_mld), ''.join(days_30_left_mld)),
+              (''.join(patients_uzb_days))]
 
     return result
 
 
 async def make_message_content(result):
-    ukraine = f'🇺🇦 Ukraine who has <=10 days: \n' + f'{result[0][0]}' + \
-              f'🇺🇦 Ukraine who has 10<=30 days: \n' + f'{result[0][1]}\n'
+    ukraine = f'🇺🇦 Украна 10> дней: \n' + f'{result[0][0]}' + \
+              f'🇺🇦 Украна 10<=30 дней: \n' + f'{result[0][1]}\n'
 
-    moldova = f'🇲🇩 Moldova who has <=10 days: \n' + f'{result[1][0]}' + \
-              f'🇲🇩 Moldova who has 10<=30 days: \n' + f'{result[1][1]}'
+    moldova = f'🇲🇩 Молдова 10> дней: \n' + f'{result[1][0]}' + \
+              f'🇲🇩 Молдова 10<=30 дней: \n' + f'{result[1][1]}\n'
 
-    return ukraine + moldova
+    uzbekistan = f'🇺🇿 Узбекистан всего дней: \n' + f'{result[2][0]}'
+
+    return ukraine + moldova + uzbekistan
 
 
 def convert_number_to_emoji(number):
