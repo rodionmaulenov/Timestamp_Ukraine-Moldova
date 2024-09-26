@@ -1,25 +1,62 @@
-FROM python:3.10-slim
+#FROM python:3.10-slim
+#
+#ENV PYTHONDONTWRITEBYTECODE 1
+#ENV PYTHONUNBUFFERED 1
+#
+#WORKDIR /usr/src/app
+#
+#COPY requirements.txt /usr/src/app/
+#
+#
+#RUN apt-get update && \
+#    pip install --root-user-action=ignore --upgrade pip && \
+#    pip install --root-user-action=ignore -r requirements.txt
+#
+#COPY . /usr/src/app/
+#
+#ENTRYPOINT ["/usr/src/app/deploy_sh/entrypoint.sh"]
+#
+FROM python:3.10-alpine AS build
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt /usr/src/app/
+COPY . .
+
+RUN apk --no-cache add --virtual .build-deps \
+    ca-certificates \
+    build-base \
+    postgresql-dev \
+    libpq-dev \
+    libffi-dev \
+    linux-headers \
+    musl-dev \
+    jpeg-dev \
+    zlib-dev \
+    && pip install --upgrade pip --root-user-action=ignore \
+    && pip install --no-cache-dir --root-user-action=ignore -v -r requirements.txt \
+    && find /usr/local \
+      \( -type d -a -name test -o -name tests \) \
+      -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
+      -exec rm -rf '{}' + \
+    && runDeps="$( \
+      scanelf --needed --nobanner --recursive /usr/local \
+      | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+      | sort -u \
+      | xargs -r apk info --installed \
+      | sort -u \
+    )" \
+    && apk add --virtual .rundeps $runDeps \
+    && apk del .build-deps \
+    && rm -rf /var/cache/apk/* \
+    && chmod +x ./deploy_sh/entrypoint.sh \
+    && chmod +x ./deploy_sh/wait-for-web.sh
+
+ENTRYPOINT ["/usr/src/app/deploy_sh/entrypoint.sh"]
 
 
-RUN apt-get update && \
-    pip install --root-user-action=ignore --upgrade pip && \
-    pip install --root-user-action=ignore -r requirements.txt
 
-COPY . /usr/src/app/
 
-RUN adduser --disabled-password --gecos "" --no-create-home customuser && \
-    chown -R customuser:customuser /usr/src/app && \
-    chmod -R 775 /usr/src/app && \
-    chmod +x entrypoint.sh
-
-USER customuser
-
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 

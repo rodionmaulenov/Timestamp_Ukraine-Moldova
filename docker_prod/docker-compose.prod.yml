@@ -25,24 +25,26 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - migrations_data:/usr/src/app/schedule/migrations
     env_file:
       - .env
     environment:
       - DJANGO_SERVICE=web
 
   celery:
+    restart: on-failure
     image: ghcr.io/rodionmaulenov/timestamp/celery-prod:v1.0.0
-    command: celery -A scheduler worker --loglevel=info
-    restart: always
+    command: /usr/src/app/deploy_sh/wait-for-web.sh celery -A scheduler worker --loglevel=info
     depends_on:
       - web
     env_file:
       - .env
 
   celery-beat:
-    restart: always
+    restart: on-failure
     image: ghcr.io/rodionmaulenov/timestamp/celery-beat-prod:v1.0.0
-    command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: /usr/src/app/deploy_sh/wait-for-web.sh celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
       - web
     env_file:
@@ -71,7 +73,7 @@ services:
 
   telegram:
     image: ghcr.io/rodionmaulenov/timestamp/tel-prod:v1.0.0
-    command: /bin/sh -c "python schedule/telegram.py"
+    command: /usr/src/app/deploy_sh/wait-for-web.sh /bin/sh -c "python schedule/telegram.py"
     depends_on:
       - web
     env_file:
@@ -80,3 +82,4 @@ services:
 
 volumes:
   postgres_data:
+  migrations_data:

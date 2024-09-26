@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5431:5431"
+      - "5431:5432"
     env_file:
       - .env
 
@@ -26,57 +26,60 @@ services:
     command: ./manage.py runserver 0.0.0.0:8000
     depends_on:
       - db
+      - redis
     ports:
       - "8000:8000"
+    volumes:
+      - migrations_data:/usr/src/app/schedule/migrations
     env_file:
       - .env
     environment:
       DJANGO_SERVICE: "web"
+      DJANGO_SETTINGS_MODULE: "scheduler.settings"
 
 
   celery:
+    restart: on-failure
     build:
       context: .
       dockerfile: Dockerfiledev
-    command: celery -A scheduler worker --loglevel=info
-    restart: on-failure
+    command: /usr/src/app/deploy_sh/wait-for-web.sh celery -A scheduler worker --loglevel=info
     volumes:
       - ./static:/usr/src/app/static
       - ./media:/usr/src/app/media
-    depends_on:
-      - web
-      - db
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: "scheduler.settings"
 
   celery-beat:
+    restart: on-failure
     build:
       context: .
       dockerfile: Dockerfiledev
-    restart: on-failure
-    command: celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: /usr/src/app/deploy_sh/wait-for-web.sh celery -A scheduler beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - ./static:/usr/src/app/static
       - ./media:/usr/src/app/media
-    depends_on:
-      - web
-      - db
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: "scheduler.settings"
 
   telegram:
+    restart: on-failure
     build:
       context: .
       dockerfile: Dockerfiledev
-    command: /bin/sh -c "python schedule/telegram.py"
+    command: /usr/src/app/deploy_sh/wait-for-web.sh /bin/sh -c "python schedule/telegram.py"
     volumes:
       - ./static:/usr/src/app/static
       - ./media:/usr/src/app/media
-    depends_on:
-      - web
-      - db
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: "scheduler.settings"
 
 volumes:
   postgres_data:
+  migrations_data:
