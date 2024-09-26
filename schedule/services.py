@@ -1,16 +1,21 @@
 import logging
 import pytz
 from datetime import timedelta, datetime
+from django.db import transaction
 from django.db.models import OuterRef, Subquery
 from aiogram.types import BufferedInputFile
-from asgiref.sync import sync_to_async
-from schedule.models import Date
+from schedule.models import Date, Message
 from PIL import Image
 from io import BytesIO
 import aiohttp
 import random
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Set up logging globally
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,18 +23,16 @@ async def get_random_cat_photo_with_text():
     logger.info("Fetching a random cat photo with text.")
 
     hello_texts = ["Kairat kogda v office?", "Hello", "Bonjour", "Привет", "ПивПив", "МяоКокао", "Raxmat Shimkentskie",
-                   "Bolshe Valericha",
-                   "Chistim zybu", "Xvatit boltat", "Alo garag", "Parvana sroki goryat", "Ainura i gdu UZI",
-                   "Gad idi suda"]
+                   "Bolshe Valericha", "Chistim zybu", "Xvatit boltat", "Alo garag", "Parvana sroki goryat",
+                   "Ainura i gdu UZI", "Gad idi suda"]
 
-    colors = ["green", "blue", "yellow", "white", "orange", "pink"]
+    colors = ["yellow", "white", "orange", "pink"]
 
-    font_size = 63
+    font_size = 65
     font_color = random.choice(colors)
     hello_text = random.choice(hello_texts)
 
     url = f"https://cataas.com/cat/says/{hello_text}?fontSize={font_size}&fontColor={font_color}"
-    logger.info("Generated URL: %s", url)
 
     async with aiohttp.ClientSession() as session:
         try:
@@ -75,36 +78,37 @@ def calculate_dates(instance, control_date):
     # Initialize total days stayed within the 180-day window
     total_days_stayed = 0
 
-    # Fetch relevant dates; ensure your Date model has datetime fields
-    dates = Date.objects.filter(
-        surrogacy_id=instance.id,
-        entry__lte=control_date.date(),
-        exit__gte=beginning_180_days.date(),
-        country=instance.country
-    )
+    with transaction.atomic():
+        # Fetch relevant dates; ensure your Date model has datetime fields
+        dates = Date.objects.filter(
+            surrogacy_id=instance.id,
+            entry__lte=control_date.date(),
+            exit__gte=beginning_180_days.date(),
+            country=instance.country
+        )
 
-    # Iterate through each date record
-    for date in dates:
+        # Iterate through each date record
+        for date in dates:
 
-        # Convert entry and exit dates to datetime objects at midnight in Kiev timezone
-        make_datetime_entry = datetime.combine(date.entry, datetime.min.time())
-        entry_date = kiev_tz.localize(make_datetime_entry)
+            # Convert entry and exit dates to datetime objects at midnight in Kiev timezone
+            make_datetime_entry = datetime.combine(date.entry, datetime.min.time())
+            entry_date = kiev_tz.localize(make_datetime_entry)
 
-        make_datetime_exit = datetime.combine(date.exit, datetime.min.time())
-        exit_date = kiev_tz.localize(make_datetime_exit)
+            make_datetime_exit = datetime.combine(date.exit, datetime.min.time())
+            exit_date = kiev_tz.localize(make_datetime_exit)
 
-        # Adjust entry_date and exit_date to fit within the 180-day period
-        entry_date = max(entry_date, beginning_180_days)
-        exit_date = min(exit_date, control_date)
+            # Adjust entry_date and exit_date to fit within the 180-day period
+            entry_date = max(entry_date, beginning_180_days)
+            exit_date = min(exit_date, control_date)
 
-        # Calculate the stay duration
-        if entry_date == exit_date:
-            stay_duration = 1  # If entry date is the same as exit date, count as 1 day
-        else:
-            stay_duration = (exit_date - entry_date).days + 1
+            # Calculate the stay duration
+            if entry_date == exit_date:
+                stay_duration = 1  # If entry date is the same as exit date, count as 1 day
+            else:
+                stay_duration = (exit_date - entry_date).days + 1
 
-        # Accumulate the total days stayed
-        total_days_stayed += stay_duration
+            # Accumulate the total days stayed
+            total_days_stayed += stay_duration
 
     # Calculate days left inclusively
     days_left = 90 - total_days_stayed
@@ -113,85 +117,83 @@ def calculate_dates(instance, control_date):
 
 
 def get_objs_disable_false(latest_dates):
-    # latest dates that is each last `Date` instance not disabled for surrogacyMother
-
     patients_ukr = {}
     patients_mld = {}
     patients_uzb = {}
     patients_ukr_10 = {}
     patients_mld_10 = {}
-    patients_uzb_days = {}
-    for date in latest_dates:
-        obj = date.surrogacy
 
-        days_left, total_days_stayed = calculate_dates(obj, date.exit)
+    with transaction.atomic():
+        for date in latest_dates:
+            obj = date.surrogacy
 
-        if days_left <= 10:
-            if obj.country == 'UKR':
-                patients_ukr_10[date.surrogacy.name] = [days_left, total_days_stayed]
+            days_left, total_days_stayed = calculate_dates(obj, date.exit)
 
-            else:
-                patients_mld_10[date.surrogacy.name] = [days_left, total_days_stayed]
+            if days_left <= 10:
+                if obj.country == 'UKR':
+                    patients_ukr_10[date.surrogacy.name] = [days_left, total_days_stayed]
 
-        if 11 < days_left <= 30:
-            if obj.country == 'UKR':
-                patients_ukr[date.surrogacy.name] = [days_left, total_days_stayed]
-            else:
-                patients_mld[date.surrogacy.name] = [days_left, total_days_stayed]
+                else:
+                    patients_mld_10[date.surrogacy.name] = [days_left, total_days_stayed]
 
-        if obj.country == 'UZB':
-            patients_uzb[date.surrogacy.name] = total_days_stayed
+            if 11 <= days_left <= 30:
+                if obj.country == 'UKR':
+                    patients_ukr[date.surrogacy.name] = [days_left, total_days_stayed]
+                else:
+                    patients_mld[date.surrogacy.name] = [days_left, total_days_stayed]
+
+            if obj.country == 'UZB':
+                patients_uzb[date.surrogacy.name] = total_days_stayed
 
     days_10_left_ukr = [
-        f'{convert_number_to_emoji(index)}. *Name:* {k} *Days left:* {v[0]}  *Days passed:* {v[1]}\n'
+        f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
         for index, (k, v) in
         enumerate(sorted(patients_ukr_10.items(), key=lambda item: item[1][0]), start=1)
     ]
 
     days_30_left_ukr = [
-        f'{convert_number_to_emoji(index)}. *Name:* {k} *Days left:* {v[0]}  *Days passed:* {v[1]}\n'
+        f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
         for index, (k, v) in
         enumerate(sorted(patients_ukr.items(), key=lambda item: item[1][0]), start=1)
     ]
 
     days_10_left_mld = [
-        f'{convert_number_to_emoji(index)}. *Name:* {k} *Days left:* {v[0]}  *Days passed:* {v[1]}\n'
+        f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
         for index, (k, v) in
         enumerate(sorted(patients_mld_10.items(), key=lambda item: item[1][0]), start=1)
     ]
 
     days_30_left_mld = [
-        f'{convert_number_to_emoji(index)}. *Name:* {k} *Days left:* {v[0]}  *Days passed:* {v[1]}\n'
+        f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
         for index, (k, v) in
         enumerate(sorted(patients_mld.items(), key=lambda item: item[1][0]), start=1)
     ]
 
     patients_uzb_days = [
-        f'{convert_number_to_emoji(index)}. *Name:* {k} *Days passed:* {v}\n'
+        f'{convert_number_to_emoji(index)}*{k}*\nПрошло: *{v}*\n'
         for index, (k, v) in
-        enumerate(sorted(patients_mld.items(), key=lambda item: item[1][0]), start=1)
+        enumerate(sorted(patients_uzb.items()))
     ]
 
     result = [(''.join(days_10_left_ukr), ''.join(days_30_left_ukr)),
               (''.join(days_10_left_mld), ''.join(days_30_left_mld)),
-              (''.join(patients_uzb_days))]
-
+              (''.join(patients_uzb_days),)]
     return result
 
 
 async def make_message_content(result):
-    ukraine = f'🇺🇦 Украна 10> дней: \n' + f'{result[0][0]}' + \
-              f'🇺🇦 Украна 10<=30 дней: \n' + f'{result[0][1]}\n'
+    ukraine = f'🇺🇦 Меньше 10 дней:\n' + f'{result[0][0]}\n' + \
+              f'🇺🇦 От 10 до 30 дней:\n' + f'{result[0][1]}\n'
 
-    moldova = f'🇲🇩 Молдова 10> дней: \n' + f'{result[1][0]}' + \
-              f'🇲🇩 Молдова 10<=30 дней: \n' + f'{result[1][1]}\n'
+    moldova = f'🇲🇩 Меньше 10 дней:\n' + f'{result[1][0]}\n' + \
+              f'🇲🇩 От 10 до 30 дней:\n' + f'{result[1][1]}\n'
 
-    uzbekistan = f'🇺🇿 Узбекистан всего дней: \n' + f'{result[2][0]}'
+    uzbekistan = f'🇺🇿 Всего дней:\n' + f'{result[2][0]}'
 
     return ukraine + moldova + uzbekistan
 
 
-def convert_number_to_emoji(number):
+def convert_number_to_emoji(number, start_from=1):
     number_emojis = {
         0: '0️⃣',
         1: '1️⃣',
@@ -205,31 +207,29 @@ def convert_number_to_emoji(number):
         9: '9️⃣'
     }
 
-    return ''.join(number_emojis[int(digit)] for digit in str(number))
-
-
-async def calculate_last_disable_dates():
-    latest_entry_subquery = await sync_to_async(lambda: Date.objects.filter(
-        surrogacy_id=OuterRef('surrogacy_id'),
-        disable=False
-    ).order_by('-entry').values('entry')[:1])()
-
-    latest_dates = await sync_to_async(lambda: Date.objects.filter(
-        entry=Subquery(latest_entry_subquery),
-        disable=False
-    ).all())()
-
-    return latest_dates
+    adjusted_number = number + start_from - 1
+    return ''.join(number_emojis[int(digit)] for digit in str(adjusted_number))
 
 
 def calculate_last_disable_dates_sync():
-    latest_entry_subquery = Date.objects.filter(
-        surrogacy_id=OuterRef('surrogacy_id'),
-        disable=False
-    ).order_by('-entry').values('entry')[:1]
+    with transaction.atomic():
+        latest_entry_subquery = Date.objects.filter(
+            surrogacy_id=OuterRef('surrogacy_id'),
+            disable=False
+        ).order_by('-entry').values('entry')[:1]
 
-    latest_dates = Date.objects.filter(
-        entry=Subquery(latest_entry_subquery),
-        disable=False
-    )
-    return latest_dates
+        latest_dates = Date.objects.filter(
+            entry=Subquery(latest_entry_subquery),
+            disable=False
+        )
+        return latest_dates
+
+
+def get_last_message():
+    with transaction.atomic():
+        return Message.objects.all().last()
+
+
+def delete_last_message(last_message):
+    with transaction.atomic():
+        last_message.delete()

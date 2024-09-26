@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DEBUG') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',') if os.environ.get('ALLOWED_HOSTS') \
-    else  ['0.0.0.0', '127.0.0.1', 'localhost']
+    else ['0.0.0.0', '127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -96,7 +96,20 @@ WSGI_APPLICATION = 'scheduler.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-if DEBUG:
+DOCKER = os.environ.get('DOCKER') == 'True'
+
+if DOCKER and DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB'),
+            'USER': os.environ.get('POSTGRES_USER'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+            'HOST': os.environ.get('POSTGRES_HOST'),
+            'PORT': '5432',
+        }
+    }
+elif DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -106,7 +119,7 @@ if DEBUG:
             'HOST': 'localhost',
             'PORT': '5432',
         }
-        }
+    }
 else:
     DATABASES = {
         'default': {
@@ -127,8 +140,6 @@ else:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
 
-
-
 # CELERY AND CELERY BEAT
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -139,7 +150,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
     'update-exit-field-every-day-5am': {
         'task': 'schedule.tasks.update_exit_field',
-        'schedule': crontab(minute='*/2'),
+        'schedule': crontab(minute='*/30'),
     },
 
     'send_message-every-day-5am': {

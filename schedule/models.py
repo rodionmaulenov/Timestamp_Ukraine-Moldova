@@ -32,7 +32,6 @@ class SurrogacyMother(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
     file = models.FileField(upload_to=directory_path, default='', verbose_name=_('File'))
-
     related_mother = models.ForeignKey(
         'self',  # Refers to the same model (SurrogacyMother)
         on_delete=models.SET_NULL,
@@ -98,10 +97,11 @@ class Uzbekistan(SurrogacyMother):
 class Message(models.Model):
     chat_id = models.CharField(max_length=255)
     message_id = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    message_hash = models.CharField(max_length=64, unique=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Message {self.message_id} in Chat {self.chat_id}"
 
     class Meta:
-        unique_together = ('chat_id', 'message_id')
+        unique_together = ('chat_id', 'message_id', 'message_hash')

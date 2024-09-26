@@ -80,7 +80,7 @@ jobs:
 
       - name: Move files on remote server
         run: |
-          scp ./docker_prod/docker-compose.prod.yml .env entrypoint.sh \
+          scp ./docker_prod/docker-compose.prod.yml .env \
           ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
 
       - name: Pull Docker images and Get ssl key
@@ -91,7 +91,7 @@ jobs:
             docker stop $(docker ps -aq)
             docker rm -f $(docker ps -aq)
             docker rmi $(docker images -q) --force
-            docker volume rm $(docker volume ls -q | grep -v timestamp_app_postgres_data) --force
+            docker volume rm $(docker volume ls -q | grep -v -e 'timestamp_app_postgres_data' -e 'timestamp_app_migrations_data') --force
 
             echo ${{ secrets.GIT_REGISTRY_ACCESS_TOKEN }} | docker login ghcr.io -u rodionmaulenov --password-stdin
 
