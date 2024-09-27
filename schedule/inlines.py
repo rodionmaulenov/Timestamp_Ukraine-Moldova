@@ -91,7 +91,7 @@ class DateInline(TabularInline):
     calculate_days.short_description = _('Days')
 
 
-    def has_view_or_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None):
         return True
 
     def has_delete_permission(self, request, obj=None):
