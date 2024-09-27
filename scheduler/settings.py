@@ -43,16 +43,18 @@ INSTALLED_APPS = [
 
     # my app
     'schedule',
-
     # third party packages
     'django_celery_beat',
     'storages',
 ]
+if DEBUG:
+    INSTALLED_APPS.append('debug_toolbar')
 
 if DEBUG:
     MIDDLEWARE = [
         'scheduler.middleware.RemoveCOOPMiddleware',
         'django.middleware.security.SecurityMiddleware',
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.locale.LocaleMiddleware',
         'django.middleware.common.CommonMiddleware',
@@ -72,6 +74,13 @@ else:
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ]
+
+# DEBUG TOOLBAR
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
+]
 
 ROOT_URLCONF = 'scheduler.urls'
 
@@ -150,15 +159,14 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
     'update-exit-field-every-day-5am': {
         'task': 'schedule.tasks.update_exit_field',
-        'schedule': crontab(minute='*/30'),
+        'schedule': crontab(minute='0', hour='4'),
     },
 
     'send_message-every-day-5am': {
         'task': 'schedule.tasks.send_message_to_work_group',
-        'schedule': crontab(minute='*/2'),
+        'schedule': crontab(minute='2'),
     },
 }
-# 'schedule': crontab(minute='0', hour='4'),
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -245,4 +253,3 @@ else:
             "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
         },
     }
-

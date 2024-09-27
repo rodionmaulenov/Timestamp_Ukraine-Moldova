@@ -1,6 +1,8 @@
 from datetime import datetime
 import pytz
 from django.contrib import admin
+from django.db import transaction
+from django.db.models import Prefetch, OuterRef, Subquery
 from django.utils.html import format_html
 from schedule.inlines import NewCountryDateInline, DateInline
 from schedule.models import Uzbekistan, SurrogacyMother, Date
@@ -22,7 +24,7 @@ class UzbekistanAdmin(admin.ModelAdmin):
     autocomplete_fields = 'related_mother',
     inlines = [DateInline, NewCountryDateInline]
     list_per_page = 15
-    ordering = '-created',
+    # ordering = '-created',
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     list_display = 'name', 'get_html_photo', 'calculate_days', 'country'
@@ -34,6 +36,7 @@ class UzbekistanAdmin(admin.ModelAdmin):
         js = 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js', 'js/shortenTextInTag.js',
 
     def get_inline_instances(self, request, obj=None):
+
         inline_instances = []
 
         if obj is None:
@@ -48,40 +51,59 @@ class UzbekistanAdmin(admin.ModelAdmin):
         return inline_instances
 
     def get_search_results(self, request, queryset, search_term):
+
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         if search_term:
             queryset = queryset.filter(name__icontains=search_term)
         return queryset, use_distinct
 
     def get_fields(self, request, obj=None):
+
         if obj:
             return ['name', 'file', 'country']
         else:
             return ['name', 'related_mother', 'file']
 
     def get_queryset(self, request):
-        return SurrogacyMother.objects.filter(country='UZB')
+        """
+        Gets only last `Date instance` with latest exit for each Mother instances.
+        """
+
+        latest_date_subquery = Date.objects.filter(
+            surrogacy_id=OuterRef('surrogacy_id'),
+            country='UZB'
+        ).order_by('-exit').values('id')[:1]
+
+        date_qs = Date.objects.filter(id=Subquery(latest_date_subquery))
+
+        return SurrogacyMother.objects.prefetch_related(
+            Prefetch('choose_dates', queryset=date_qs, to_attr='uzb_dates')
+        ).filter(country='UZB')
 
     def calculate_days(self, obj):
+
         if obj is not None:
-            last_date = Date.objects.filter(surrogacy_id=obj.id, country='UZB').order_by('-exit').first()
 
-            if last_date:
-                kiev_tz = pytz.timezone('Europe/Kiev')
+            if hasattr(obj, 'uzb_dates') and obj.uzb_dates:
+                last_date = obj.uzb_dates[0]
 
-                date_time = datetime.combine(last_date.exit, datetime.min.time())
-                exit = kiev_tz.localize(date_time)
+                if last_date:
+                    kiev_tz = pytz.timezone('Europe/Kiev')
 
-                date_time = datetime.combine(last_date.entry, datetime.min.time())
-                entry = kiev_tz.localize(date_time)
+                    date_time = datetime.combine(last_date.exit, datetime.min.time())
+                    exit = kiev_tz.localize(date_time)
 
-                return (exit - entry).days + 1
+                    date_time = datetime.combine(last_date.entry, datetime.min.time())
+                    entry = kiev_tz.localize(date_time)
+
+                    return (exit - entry).days + 1
         return '-'
 
     calculate_days.short_description = _('Days')
 
     @admin.action(description=_('Image'))
     def get_html_photo(self, obj):
+
         if obj.file:
             file_url = obj.file.url
 
@@ -115,13 +137,12 @@ class UzbekistanAdmin(admin.ModelAdmin):
                         # Check if the inline form has a country field value
                         if 'country' in cleaned_data and cleaned_data['country']:
                             # Use the country selected in the inline form
-                            date_instance.country = cleaned_data['country']
+                            Date.objects.filter(id=date_instance.id).update(country=cleaned_data['country'])
 
-                            surrogacy_instance.country = cleaned_data['country']
-                            surrogacy_instance.save()
+                            SurrogacyMother.objects.filter(id=surrogacy_instance.id).update(country=cleaned_data['country'])
                         else:
                             # Default to the parent's country if no country is selected in the inline
-                            date_instance.country = surrogacy_instance.country
+                            Date.objects.filter(id=date_instance.id).update(country=surrogacy_instance.country)
 
                         date_instance.save()
 
@@ -132,15 +153,23 @@ class UzbekistanAdmin(admin.ModelAdmin):
         if not change and obj.related_mother:
             related_mother = obj.related_mother
 
+            related_mother = SurrogacyMother.objects.prefetch_related('choose_dates').get(id=related_mother.id)
+
             super().save_model(request, obj, form, change)
 
-            for date_obj in related_mother.choose_dates.all():
-                Date.objects.create(surrogacy=obj,
-                                    entry=date_obj.entry,
-                                    exit=date_obj.exit,
-                                    country=date_obj.country,
-                                    disable=date_obj.disable
-                                    )
+            date_objects = [
+                Date(surrogacy=obj,
+                     entry=date_obj.entry,
+                     exit=date_obj.exit,
+                     country=date_obj.country,
+                     disable=date_obj.disable
+                     )
+                for date_obj in related_mother.choose_dates.iterator(chunk_size=50)
+            ]
+
+            # Bulk create the Date objects in one query
+            with transaction.atomic():
+                Date.objects.bulk_create(date_objects)
 
         else:
             super().save_model(request, obj, form, change)

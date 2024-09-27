@@ -85,7 +85,7 @@ def calculate_dates(instance, control_date):
             entry__lte=control_date.date(),
             exit__gte=beginning_180_days.date(),
             country=instance.country
-        )
+        ).only('entry', 'exit').iterator(chunk_size=50)
 
         # Iterate through each date record
         for date in dates:
@@ -216,20 +216,21 @@ def calculate_last_disable_dates_sync():
         latest_entry_subquery = Date.objects.filter(
             surrogacy_id=OuterRef('surrogacy_id'),
             disable=False
-        ).order_by('-entry').values('entry')[:1]
+        ).order_by('-exit').values('exit')[:1]
 
         latest_dates = Date.objects.filter(
             entry=Subquery(latest_entry_subquery),
             disable=False
-        )
+        ).iterator(chunksize=500)
         return latest_dates
 
 
 def get_last_message():
     with transaction.atomic():
-        return Message.objects.all().last()
+        return Message.objects.only('chat_id', 'message_id').order_by('-timestamp').first()
 
 
 def delete_last_message(last_message):
-    with transaction.atomic():
-        last_message.delete()
+    if last_message:
+        with transaction.atomic():
+            last_message.delete()

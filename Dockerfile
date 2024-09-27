@@ -1,21 +1,3 @@
-#FROM python:3.10-slim
-#
-#ENV PYTHONDONTWRITEBYTECODE 1
-#ENV PYTHONUNBUFFERED 1
-#
-#WORKDIR /usr/src/app
-#
-#COPY requirements.txt /usr/src/app/
-#
-#
-#RUN apt-get update && \
-#    pip install --root-user-action=ignore --upgrade pip && \
-#    pip install --root-user-action=ignore -r requirements.txt
-#
-#COPY . /usr/src/app/
-#
-#ENTRYPOINT ["/usr/src/app/deploy_sh/entrypoint.sh"]
-#
 FROM python:3.10-alpine AS build
 
 ENV PYTHONUNBUFFERED=1 \
