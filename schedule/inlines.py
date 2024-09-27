@@ -65,14 +65,16 @@ class DateInline(TabularInline):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
 
+        # Filter by the path to get the correct country
         if 'moldova' in request.path.split('/'):
-            return qs.filter(country='MLD')
+            qs = qs.filter(country='MLD')
+        elif 'ukraine' in request.path.split('/'):
+            qs = qs.filter(country='UKR')
+        elif 'uzbekistan' in request.path.split('/'):
+            qs = qs.filter(country='UZB')
 
-        if 'ukraine' in request.path.split('/'):
-            return qs.filter(country='UKR')
-
-        if 'uzbekistan' in request.path.split('/'):
-            return qs.filter(country='UZB')
+        # Return only the most recent (or specific) Date instance
+        return qs.order_by('-exit')[:1]  #
 
     def calculate_days(self, obj):
         if obj is not None:
