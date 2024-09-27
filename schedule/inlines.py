@@ -32,6 +32,12 @@ class NewCountryDateInline(TabularInline):
         """
         return Date.objects.none()
 
+    def has_add_permission(self, request, obj=None):
+        return True
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return True
+
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -76,7 +82,13 @@ class DateInline(TabularInline):
                 return (exit - entry).days + 1
         return '-'
 
+    calculate_days.short_description = _('Days')
+
+    def has_add_permission(self, request, obj=None):
+        return True
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return True
+
     def has_delete_permission(self, request, obj=None):
         return False
-
-    calculate_days.short_description = _('Days')
