@@ -26,6 +26,12 @@ class NewCountryDateInline(TabularInline):
     verbose_name = _("Define date")
     verbose_name_plural = _("Define dates")
 
+    def get_max_num(self, request, obj=None, **kwargs):
+        if obj is None:
+            return 6
+        else:
+            return 2
+
     def get_queryset(self, request):
         """
         Override the queryset to hide existing Date objects.
@@ -84,8 +90,6 @@ class DateInline(TabularInline):
 
     calculate_days.short_description = _('Days')
 
-    def has_add_permission(self, request, obj=None):
-        return True
 
     def has_view_or_change_permission(self, request, obj=None):
         return True

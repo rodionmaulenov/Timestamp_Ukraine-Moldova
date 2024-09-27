@@ -52,7 +52,7 @@ class MoldovaAdmin(admin.ModelAdmin):
 
         return SurrogacyMother.objects.prefetch_related(
             Prefetch('choose_dates', queryset=date_qs, to_attr='uzb_dates')
-        ).filter(country='Moldova')
+        ).filter(country='MLD')
 
     @admin.action(description=_('Control date'))
     def control_date(self, obj):
