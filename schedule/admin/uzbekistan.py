@@ -54,7 +54,7 @@ class UzbekistanAdmin(admin.ModelAdmin):
 
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         if search_term:
-            queryset = queryset.filter(name__icontains=search_term)
+            queryset = SurrogacyMother.objects.filter(name__icontains=search_term)
         return queryset, use_distinct
 
     def get_fields(self, request, obj=None):
