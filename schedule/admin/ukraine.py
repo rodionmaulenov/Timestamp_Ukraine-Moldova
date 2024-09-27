@@ -1,6 +1,8 @@
 import pytz
 from django.contrib import admin
 from datetime import timedelta, datetime
+
+from django.db.models import OuterRef, Prefetch, Subquery
 from django.utils.safestring import mark_safe
 from schedule.inlines import DateInline, NewCountryDateInline
 from django.utils.html import format_html
@@ -41,7 +43,17 @@ class UkraineAdmin(admin.ModelAdmin):
             return ['name', 'related_mother', 'file']
 
     def get_queryset(self, request):
-        return SurrogacyMother.objects.filter(country='UKR')
+
+        latest_date_subquery = Date.objects.filter(
+            surrogacy_id=OuterRef('surrogacy_id'),
+            country='UKR'
+        ).order_by('-exit').values('id')[:1]
+
+        date_qs = Date.objects.filter(id=Subquery(latest_date_subquery))
+
+        return SurrogacyMother.objects.prefetch_related(
+            Prefetch('choose_dates', queryset=date_qs, to_attr='uzb_dates')
+        ).filter(country='UKR')
 
     @admin.action(description=_('Control date'))
     def control_date(self, obj):

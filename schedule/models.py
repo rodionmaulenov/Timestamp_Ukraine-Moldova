@@ -65,12 +65,16 @@ class Date(models.Model):
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES, verbose_name=_('Country'))
     disable = models.BooleanField(default=False, verbose_name=_('Disable'))
 
-    def __str__(self):
-        return f"Range {self.entry} -- {self.exit} for {self.surrogacy.name}"
-
     class Meta:
+        indexes = [
+            models.Index(fields=['surrogacy', 'country', 'exit']),
+        ]
         verbose_name = _('Date')
         verbose_name_plural = _('Dates')
+
+
+    def __str__(self):
+        return f"Range {self.entry} -- {self.exit} for {self.surrogacy.name}"
 
 
 class Ukraine(SurrogacyMother):
