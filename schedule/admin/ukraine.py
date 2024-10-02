@@ -48,7 +48,7 @@ class UkraineAdmin(admin.ModelAdmin):
             country='UKR'
         ).order_by('-exit').values('id')[:1]
 
-        latest_date_qs = Date.objects.filter(id=Subquery(latest_date_subquery)).only('surrogacy', 'exit')
+        latest_date_qs = Date.objects.filter(id=Subquery(latest_date_subquery), country='UKR').only('surrogacy', 'exit')
 
         all_dates_qs = Date.objects.filter(country='UKR').only('surrogacy', 'entry', 'exit')
 
