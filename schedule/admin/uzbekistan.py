@@ -66,7 +66,7 @@ class UzbekistanAdmin(admin.ModelAdmin):
             country='UZB'
         ).order_by('-exit').values('id')[:1]
 
-        latest_date_qs = Date.objects.filter(id=Subquery(latest_date_subquery))
+        latest_date_qs = Date.objects.filter(id=Subquery(latest_date_subquery), country='UZB')
 
         return SurrogacyMother.objects.only('name', 'country', 'file').prefetch_related(
             Prefetch('choose_dates', queryset=latest_date_qs, to_attr='latest_date')
