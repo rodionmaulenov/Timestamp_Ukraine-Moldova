@@ -73,10 +73,6 @@ class Date(models.Model):
         verbose_name_plural = _('Dates')
 
 
-    def __str__(self):
-        return f"Range {self.entry} -- {self.exit} for {self.surrogacy.name}"
-
-
 class Ukraine(SurrogacyMother):
     class Meta:
         proxy = True

@@ -62,23 +62,22 @@ async def get_random_cat_photo_with_text():
             raise
 
 
-def calculate_dates(instance, control_date):
+def calculate_dates(instance, control_date, pre_fetched_dates=None):
+
     # Define the Kiev time zone using pytz
     kiev_tz = pytz.timezone('Europe/Kiev')
-
     # Assuming control_date is a date object; convert it to a datetime object at midnight
     control_date = datetime.combine(control_date, datetime.min.time())
-
     # Convert control_date to a timezone-aware datetime object in Kiev timezone
     control_date = kiev_tz.localize(control_date)
-
     # Calculate the start of the 180-day period at midnight in Kiev timezone
     beginning_180_days = control_date - timedelta(days=179)
-
     # Initialize total days stayed within the 180-day window
     total_days_stayed = 0
 
-    with transaction.atomic():
+    if pre_fetched_dates is not None:
+        dates = pre_fetched_dates
+    else:
         # Fetch relevant dates; ensure your Date model has datetime fields
         dates = Date.objects.filter(
             surrogacy_id=instance.id,
@@ -87,28 +86,28 @@ def calculate_dates(instance, control_date):
             country=instance.country
         ).only('entry', 'exit').iterator(chunk_size=50)
 
-        # Iterate through each date record
-        for date in dates:
+    # Iterate through each date record
+    for date in dates:
 
-            # Convert entry and exit dates to datetime objects at midnight in Kiev timezone
-            make_datetime_entry = datetime.combine(date.entry, datetime.min.time())
-            entry_date = kiev_tz.localize(make_datetime_entry)
+        # Convert entry and exit dates to datetime objects at midnight in Kiev timezone
+        make_datetime_entry = datetime.combine(date.entry, datetime.min.time())
+        entry_date = kiev_tz.localize(make_datetime_entry)
 
-            make_datetime_exit = datetime.combine(date.exit, datetime.min.time())
-            exit_date = kiev_tz.localize(make_datetime_exit)
+        make_datetime_exit = datetime.combine(date.exit, datetime.min.time())
+        exit_date = kiev_tz.localize(make_datetime_exit)
 
-            # Adjust entry_date and exit_date to fit within the 180-day period
-            entry_date = max(entry_date, beginning_180_days)
-            exit_date = min(exit_date, control_date)
+        # Adjust entry_date and exit_date to fit within the 180-day period
+        entry_date = max(entry_date, beginning_180_days)
+        exit_date = min(exit_date, control_date)
 
-            # Calculate the stay duration
-            if entry_date == exit_date:
-                stay_duration = 1  # If entry date is the same as exit date, count as 1 day
-            else:
-                stay_duration = (exit_date - entry_date).days + 1
+        # Calculate the stay duration
+        if entry_date == exit_date:
+            stay_duration = 1  # If entry date is the same as exit date, count as 1 day
+        else:
+            stay_duration = (exit_date - entry_date).days + 1
 
-            # Accumulate the total days stayed
-            total_days_stayed += stay_duration
+        # Accumulate the total days stayed
+        total_days_stayed += stay_duration
 
     # Calculate days left inclusively
     days_left = 90 - total_days_stayed
