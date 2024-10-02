@@ -1,13 +1,16 @@
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
 import asyncio
 import logging
 import os
+
+from aiogram.filters import CommandStart
 from dotenv import load_dotenv
 
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 chat_id = os.environ.get('CHAT_ID')
+
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN)
 dp = Dispatcher()
