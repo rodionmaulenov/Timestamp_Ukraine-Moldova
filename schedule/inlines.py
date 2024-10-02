@@ -3,78 +3,38 @@ from django import forms
 import pytz
 from django.contrib.admin import TabularInline
 from django.utils.translation import gettext_lazy as _
-from django.contrib import admin
 from schedule.models import Date
 
 
 class NewCountryDateFormset(forms.models.BaseInlineFormSet):
     def clean(self):
-        for ind, form in enumerate(self.forms):
-            if len(self.forms) == 2:
-                if ind == 0:
-                    if form.cleaned_data and not form.cleaned_data['disable']:
-                        form.add_error('disable', 'Turn on this field')
+
+        if not self.is_valid():
+            return
+
+        for ind, form in enumerate(self.forms[:-1]):
+            if form.cleaned_data and not form.cleaned_data['disable']:
+                form.add_error('disable', 'Turn on this field')
 
 
 class NewCountryDateInline(TabularInline):
     formset = NewCountryDateFormset
     extra = 0
-    fields = ['entry', 'exit', 'disable', 'country']
-    radio_fields = {"country": admin.HORIZONTAL}
+    fields = ['entry', 'exit', 'calculate_days', 'disable', 'country']
+    readonly_fields = ['calculate_days']
     model = Date
-    max_num = 2
     verbose_name = _("Define date")
     verbose_name_plural = _("Define dates")
+    template = 'admin/schedule/date/tabular.html'
+    ordering = 'entry', 'exit'
 
-    def get_max_num(self, request, obj=None, **kwargs):
-        if obj is None:
-            return 6
-        else:
-            return 2
-
-    def get_queryset(self, request):
-        """
-        Override the queryset to hide existing Date objects.
-        """
-        return Date.objects.none()
-
-    def has_add_permission(self, request, obj=None):
-        return True
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return True
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-
-class DateInline(TabularInline):
-    extra = 0
-    fields = ['entry', 'exit', 'disable', 'calculate_days', 'country']
-    readonly_fields = ['calculate_days']
-    radio_fields = {"country": admin.HORIZONTAL}
-    model = Date
-    verbose_name = _("Control date")
-    verbose_name_plural = _("Control dates")
-    max_num = 1
 
     class Media:
+        css = {
+            'all': ('css/tabular/tabular_date.css',)
+        }
 
-        js = 'js/rmHelpText.js',
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-
-        # Filter by the path to get the correct country
-        if 'moldova' in request.path.split('/'):
-            qs = qs.filter(country='MLD')
-        elif 'ukraine' in request.path.split('/'):
-            qs = qs.filter(country='UKR')
-        elif 'uzbekistan' in request.path.split('/'):
-            qs = qs.filter(country='UZB')
-
-        # Return only the most recent (or specific) Date instance
-        return qs.order_by('-exit')[:1]  #
+        js =   'js/rmHelpText.js', 'js/tabular/foldUnfoldRows.js', 'js/tabular/changeRowMode.js',
 
     def calculate_days(self, obj):
         if obj is not None:
@@ -93,8 +53,21 @@ class DateInline(TabularInline):
     calculate_days.short_description = _('Days')
 
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj):
+        return True
+
+    def has_view_permission(self, request, obj=None):
+        return True
+
     def has_change_permission(self, request, obj=None):
         return True
 
-    def has_delete_permission(self, request, obj=None):
-        return False
+
+
+
+
+
+

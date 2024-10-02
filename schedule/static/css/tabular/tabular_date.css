@@ -1,0 +1,59 @@
+div.tabular h2.inline-heading {
+    border-right: 1px solid rgba(174, 180, 188, 0.7) !important;
+    border-left: 1px solid rgba(174, 180, 188, 0.7) !important;
+    border-top: 1px solid rgba(174, 180, 188, 0.7) !important;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background-color: #f6f8fa !important;
+    color: #1f2328 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+    text-transform: lowercase;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+div.tabular thead {
+    border: 1px solid rgba(174, 180, 188, 0.7) !important;
+}
+
+div.tabular th {
+    background-color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 12px;
+    text-transform: capitalize;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+    border: 0;
+}
+
+div.tabular .form-row {
+    border: 1px solid rgba(174, 180, 188, 0.7) !important;
+    background-color: #ffffff !important;
+}
+
+div.tabular .form-row td {
+    border: 0 !important;
+}
+
+div.tabular .form-row p {
+    color: #1f2328 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+    font-size: 12px !important;
+}
+
+
+div.tabular .add-row td {
+    border: none !important;
+    background-color: #ffffff !important;
+}
+
+
+.revert-button {
+    background-color: #ffffff !important;
+    border: none !important;
+    cursor: pointer;
+}
+
+#fold-unfold-btn {
+    background-color: #ffffff !important;
+    cursor: pointer;
+}
