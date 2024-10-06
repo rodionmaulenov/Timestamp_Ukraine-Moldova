@@ -27,13 +27,16 @@ class MoldovaAdmin(admin.ModelAdmin):
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = NewCountryDateInline,
-    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date', "control_date",
+    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date', "control_date", \
+        'ukr_inform_card_link',
 
     class Media:
         css = {
-            'all': ('css/image_scale.css',)
+            'all': ('css/datepicker.min.css', 'css/image_scale.css', 'css/popup1.css', )
         }
-        js = 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js',
+        js = "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js", 'js/datepicker.min.js' , \
+            'js/i18n/datepicker.en.js', 'js/imageScale.js', 'js/controlDate1.js', 'js/hidePelement.js', \
+            'js/toolTip1.js', 'js/copyControlDate1.js'
 
     def get_fields(self, request, obj=None):
         if obj:
@@ -43,33 +46,47 @@ class MoldovaAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
 
-        latest_date_subquery = Date.objects.filter(
+        latest_date_mld_subquery = Date.objects.filter(
             surrogacy_id=OuterRef('surrogacy_id'),
             country='MLD'
         ).order_by('-exit').values('id')[:1]
 
-        latest_date_qs = Date.objects.filter(id=Subquery(latest_date_subquery)).only('surrogacy', 'exit')
+        latest_date_ukr_subquery = Date.objects.filter(
+            surrogacy_id=OuterRef('surrogacy_id'),
+            country='UKR'
+        ).order_by('-exit').values('id')[:1]
 
+        latest_date_mld_qs = Date.objects.filter(id=Subquery(latest_date_mld_subquery)).only('surrogacy', 'exit')
+        latest_date_ukr_qs = Date.objects.filter(id=Subquery(latest_date_ukr_subquery)).only('surrogacy', 'exit')
         all_dates_qs = Date.objects.filter(country='MLD').only('surrogacy', 'entry', 'exit')
 
         return SurrogacyMother.objects.only('name', 'country', 'file').prefetch_related(
-            # Prefetch the latest date into 'latest_date'
-            Prefetch('choose_dates', queryset=latest_date_qs, to_attr='latest_date'),
-            # Prefetch all 'UKR' dates into 'prefetched_dates'
+            Prefetch('choose_dates', queryset=latest_date_mld_qs, to_attr='latest_date_mld'),
+            Prefetch('choose_dates', queryset=latest_date_ukr_qs, to_attr='latest_date_ukr'),
             Prefetch('choose_dates', queryset=all_dates_qs, to_attr='prefetched_dates')
         ).filter(country='MLD')
 
     @admin.action(description=_('Control date'))
     def control_date(self, obj):
-        return format_html((render_to_string('admin/schedule/control_date.html', {'obj': obj})))
+        return format_html((render_to_string('admin/schedule/control_date.html',
+                                             {'obj': obj, 'country': 'MLD'})))
+
+    @admin.action(description=_('Control date Ukraine'))
+    def ukr_inform_card_link(self, obj):
+        return format_html((render_to_string('admin/schedule/inform_card.html',
+                                             {
+                                                 'obj': obj,
+                                                 'country': 'UKR',
+                                                 'update_date_ukr': self.get_update_date_in_ukr(obj)
+                                             })))
 
     def get_latest_date(self, obj):
         """
         Use the prefetched 'latest_date' to avoid hitting the database multiple times.
         """
         # Since 'latest_date' is pre-fetched, access it directly from the cached data
-        if hasattr(obj, 'latest_date') and obj.latest_date:
-            return obj.latest_date[0]  # Get the first (and only) date in the prefetched list
+        if hasattr(obj, 'latest_date_mld') and obj.latest_date_mld:
+            return obj.latest_date_mld[0]
         return None
 
     @admin.action(description=_('Update Date'))
@@ -86,6 +103,22 @@ class MoldovaAdmin(admin.ModelAdmin):
             localize_date = kiev_tz.localize(date_time)
 
             return (localize_date + timedelta(days=91)).date()
+
+    @admin.action(description=_('Update Date Ukraine'))
+    def get_update_date_in_ukr(self, obj):
+
+        kiev_tz = pytz.timezone('Europe/Kiev')
+
+        if hasattr(obj, 'latest_date_ukr') and obj.latest_date_ukr:
+            date_obj = obj.latest_date_ukr[0]
+
+            control_date = date_obj.exit
+            date_time = datetime.combine(control_date, datetime.min.time())
+            localize_date = kiev_tz.localize(date_time)
+
+            return (localize_date + timedelta(days=91)).date()
+
+        return _('Has`t been in Ukraine')
 
     @admin.action(description=_('Days have passed'))
     def get_days_spent(self, obj):
@@ -132,11 +165,16 @@ class MoldovaAdmin(admin.ModelAdmin):
         custom_urls = [
             path('calculate_control_date/', self.admin_site.admin_view(self.calculate_control_date),
                  name='calculate-control-date'),
+            path('calculate_control_date_in_ukr/', self.admin_site.admin_view(self.calculate_control_date_in_ukr),
+                 name='calculate-control-date-ukr'),
         ]
         return custom_urls + urls
 
-    def calculate_control_date(self, request):
-
+    @staticmethod
+    def calculate_control_date(request):
+        """
+        This method is handled in Celery task and in Django admin list page too.
+        """
         surrogacy_mother_id = request.GET.get('id')
         control_date = request.GET.get('control_date')
 
@@ -145,6 +183,18 @@ class MoldovaAdmin(admin.ModelAdmin):
 
         days_left, _ = calculate_dates(obj, control_date)
 
+        return JsonResponse({'days_left': days_left})
+
+    @staticmethod
+    def calculate_control_date_in_ukr(request):
+
+        surrogacy_mother_id = request.GET.get('id')
+        control_date = request.GET.get('control_date')
+
+        control_date = datetime.strptime(control_date, '%Y-%m-%d')
+        obj = SurrogacyMother.objects.get(pk=surrogacy_mother_id)
+
+        days_left, _ = calculate_dates(obj, control_date, country='UKR')
         return JsonResponse({'days_left': days_left})
 
     def save_related(self, request, form, formsets, change):
@@ -174,4 +224,3 @@ class MoldovaAdmin(admin.ModelAdmin):
                         date_instance.save()
 
         super().save_related(request, form, formsets, change)
-
