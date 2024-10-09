@@ -29,12 +29,12 @@ class NewCountryDateInline(TabularInline):
     ordering = 'entry', 'exit'
 
 
-    class Media:
-        css = {
-            'all': ('css/tabular/tabular_date.css',)
-        }
-
-        js =   'js/rmHelpText.js', 'js/tabular/foldUnfoldRows.js', 'js/tabular/changeRowMode.js',
+    # class Media:
+    #     css = {
+    #         'all': ('css/tabular/tabular_date.css',)
+    #     }
+    #
+    #     js =   'js/rmHelpText.js', 'js/tabular/foldUnfoldRows.js', 'js/tabular/changeRowMode.js',
 
     def calculate_days(self, obj):
         if obj is not None:
