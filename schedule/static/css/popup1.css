@@ -227,23 +227,24 @@
     stroke-width: 2;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    /* Tooltip adjustments for mobile */
-    .tooltip_element {
-        max-width: 90vw; /* Ensure the tooltip doesn't overflow on smaller screens */
-        left: 50%;
-        transform: translateX(-50%); /* Center the tooltip */
-    }
+/*!* Responsive adjustments *!*/
+/*@media (max-width: 768px) {*/
+/*    !* Tooltip adjustments for mobile *!*/
+/*    .tooltip_element {*/
+/*        max-width: 90vw; !* Ensure the tooltip doesn't overflow on smaller screens *!*/
+/*        left: 50%;*/
+/*        transform: translateX(-50%); !* Center the tooltip *!*/
+/*    }*/
 
-    /* Center the datepicker on mobile */
-    .datepicker {
-        transform: translate(-50%, -50%) !important; /* Adjust position to truly center */
-        width: 70vw !important; /* Make sure the datepicker fits within the screen width */
-        max-width: 280px !important; /* Optional: set a max width */
-        z-index: 9999 !important; /* Ensure it stays on top */
-    }
-}
+/*    !* Center the datepicker on mobile *!*/
+/*    .datepicker {*/
+/*        transform: translate(-50%, -50%) !important; !* Adjust position to truly center *!*/
+/*        width: 70vw !important; !* Make sure the datepicker fits within the screen width *!*/
+/*        max-width: 280px !important; !* Optional: set a max width *!*/
+/*        z-index: 9999 !important; !* Ensure it stays on top *!*/
+/*    }*/
+/*}*/
+
 
 
 
