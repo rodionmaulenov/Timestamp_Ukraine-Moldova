@@ -27,14 +27,14 @@ class MoldovaAdmin(admin.ModelAdmin):
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = NewCountryDateInline,
-    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date',  \
+    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date', \
         'ukr_inform_card_link',
 
     class Media:
         css = {
-            'all': ('css/datepicker.min.css', 'css/image_scale.css', 'css/popup1.css', )
+            'all': ('css/datepicker.min.css', 'css/image_scale.css', 'css/popup1.css',)
         }
-        js = "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js", 'js/datepicker.min.js' , \
+        js = "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js", 'js/datepicker.min.js', \
             'js/i18n/datepicker.en.js', 'js/imageScale.js', 'js/controlDate1.js', 'js/hidePelement.js', \
             'js/toolTip1.js', 'js/copyControlDate1.js', 'js/littleTips1.js'
 
@@ -184,7 +184,7 @@ class MoldovaAdmin(admin.ModelAdmin):
         for formset in formsets:
             if formset.model == Date:
                 for inline_form in formset.forms:
-                    if inline_form.cleaned_data:
+                    if inline_form.cleaned_data and not inline_form.cleaned_data.get('DELETE', False):
                         date_instance = inline_form.instance
                         cleaned_data = inline_form.cleaned_data
                         # Check if the inline form has a country field value
