@@ -27,7 +27,7 @@ class MoldovaAdmin(admin.ModelAdmin):
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = NewCountryDateInline,
-    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date', "control_date", \
+    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date',  \
         'ukr_inform_card_link',
 
     class Media:
@@ -66,12 +66,7 @@ class MoldovaAdmin(admin.ModelAdmin):
             Prefetch('choose_dates', queryset=all_dates_qs, to_attr='prefetched_dates')
         ).filter(country='MLD')
 
-    @admin.action(description=_('Control date'))
-    def control_date(self, obj):
-        return format_html((render_to_string('admin/schedule/control_date.html',
-                                             {'obj': obj, 'country': 'MLD'})))
-
-    @admin.action(description=_('Control date Ukraine'))
+    @admin.action(description=_('Control dates Ukraine'))
     def ukr_inform_card_link(self, obj):
         return format_html((render_to_string('admin/schedule/inform_card.html',
                                              {
@@ -163,36 +158,18 @@ class MoldovaAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('calculate_control_date/', self.admin_site.admin_view(self.calculate_control_date),
-                 name='calculate-control-date'),
             path('calculate_control_date_in_ukr/', self.admin_site.admin_view(self.calculate_control_date_in_ukr),
                  name='calculate-control-date-ukr'),
         ]
         return custom_urls + urls
 
-    @staticmethod
-    def calculate_control_date(request):
-        """
-        This method is handled in Celery task and in Django admin list page too.
-        """
-        surrogacy_mother_id = request.GET.get('id')
-        control_date = request.GET.get('control_date')
-
-        control_date = datetime.strptime(control_date, '%Y-%m-%d')
-        obj = SurrogacyMother.objects.get(pk=surrogacy_mother_id)
-
-        days_left, _ = calculate_dates(obj, control_date)
-
-        return JsonResponse({'days_left': days_left})
-
-    @staticmethod
-    def calculate_control_date_in_ukr(request):
+    def calculate_control_date_in_ukr(self, request):
 
         surrogacy_mother_id = request.GET.get('id')
         control_date = request.GET.get('control_date')
 
         control_date = datetime.strptime(control_date, '%Y-%m-%d')
-        obj = SurrogacyMother.objects.get(pk=surrogacy_mother_id)
+        obj = self.get_queryset(request).get(pk=surrogacy_mother_id)
 
         days_left, _ = calculate_dates(obj, control_date, country='UKR')
         return JsonResponse({'days_left': days_left})

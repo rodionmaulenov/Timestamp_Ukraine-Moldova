@@ -79,7 +79,7 @@
 /* Apply these styles to both .days_left_tooltip and .days_left */
 .days_left_tooltip, .days_left {
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 1s ease;
 }
 
 .days_left_tooltip.fade-in, .days_left.fade-in {
