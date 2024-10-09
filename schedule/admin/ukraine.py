@@ -189,7 +189,7 @@ class UkraineAdmin(admin.ModelAdmin):
         for formset in formsets:
             if formset.model == Date:
                 for inline_form in formset.forms:
-                    if inline_form.cleaned_data:
+                    if inline_form.cleaned_data and not inline_form.cleaned_data.get('DELETE', False):
                         date_instance = inline_form.instance
                         cleaned_data = inline_form.cleaned_data
                         # Check if the inline form has a country field value
