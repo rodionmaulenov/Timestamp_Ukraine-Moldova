@@ -59,20 +59,13 @@ function copyToClipboard(text, tooltipElement) {
 function showCopiedTooltip(tooltipElement) {
     const getHoveredElm = tooltipElement.querySelector('.tips');
 
-    const translatedText = gettext('Control dates copied');
-    const svgUrl = '../svg/check-circle.svg';
-
     // Update the tooltip text and add the class to show the tooltip
     getHoveredElm.classList.add('successful_copied');
-
-    getHoveredElm.setAttribute('data-tooltip-after', `url(${svgUrl}) ' ${translatedText}'`);
-
 
     getHoveredElm.addEventListener('mouseleave', () => {
 
         setTimeout(() => {
             getHoveredElm.classList.remove('successful_copied');
-            getHoveredElm.removeAttribute('data-tooltip-after');
         }, 500);
     });
 }
