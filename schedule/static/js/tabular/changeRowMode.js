@@ -51,8 +51,13 @@ window.onload = function () {
             const textElement = document.createElement('p');  // Create a new paragraph element
             if (checkboxField.checked) {
                 textElement.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#216e39" class="bi bi-patch-check-fill" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#216e39" class="bi bi-patch-check-fill" viewBox="0 0 16 16">
                   <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
+                </svg>`;
+            } else {
+                textElement.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#cf222e" class="bi bi-x-octagon-fill" viewBox="0 0 16 16">
+                  <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
                 </svg>`;
             }
 
@@ -69,7 +74,7 @@ window.onload = function () {
         }
     }
 
-    // Function to toggle the visibility of the form fields
+    //Function to toggle the visibility of the form fields
     function toggleRowVisibility(row, button) {
         const entryField = row.querySelector('input[name$="-entry"]');
         const exitField = row.querySelector('input[name$="-exit"]');
@@ -117,6 +122,8 @@ window.onload = function () {
 
             if (entryField) {
                 const parentP = entryField.closest('p.date');
+                plainTextElements[0].textContent = entryField.value;
+
                 const spanElements = parentP.querySelectorAll('span');  // Find related span elements
                 entryField.style.display = 'none';  // Hide the input field
                 spanElements.forEach(span => span.style.display = 'none');  // Hide the span elements
@@ -124,17 +131,27 @@ window.onload = function () {
 
             if (exitField) {
                 const parentP = exitField.closest('p.date');
+                plainTextElements[1].textContent = exitField.value;
+
                 const spanElements = parentP.querySelectorAll('span');  // Find related span elements
                 exitField.style.display = 'none';  // Hide the input field
                 spanElements.forEach(span => span.style.display = 'none');  // Hide the span elements
             }
 
-            if (countryField) {
-                countryField.style.display = 'none';  // Hide the select field
+            if (disableCheckbox) {
+                plainTextElements[2].innerHTML = disableCheckbox.checked ? `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#216e39" class="bi bi-patch-check-fill" viewBox="0 0 16 16">
+                  <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
+                </svg>` : `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#cf222e" class="bi bi-x-octagon-fill" viewBox="0 0 16 16">
+                  <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zm-6.106 4.5L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
+                </svg>`;
+                disableCheckbox.style.display = 'none';  // Hide the checkbox
             }
 
-            if (disableCheckbox) {
-                disableCheckbox.style.display = 'none';  // Hide the checkbox
+              if (countryField) {
+                plainTextElements[3].textContent = countryField.options[countryField.selectedIndex].text;
+                countryField.style.display = 'none';  // Hide the select field
             }
 
             // Switch to the plus icon for showing (non-editable state)
@@ -142,42 +159,48 @@ window.onload = function () {
         }
     }
 
-    // Function to set the SVG icon (either plus or minus)
+    // Function to set the SVG icon (either pencil or minus)
     function setButtonIcon(button, type) {
         // Remove existing icon if any
         button.innerHTML = '';
 
+
         // Create the new SVG element
         const svgIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svgIcon.setAttribute("width", "18");
-        svgIcon.setAttribute("height", "18");
+        svgIcon.setAttribute("width", "16");
+        svgIcon.setAttribute("height", "16");
         svgIcon.setAttribute("fill", "currentColor");
 
         if (type === 'minus') {
-            svgIcon.setAttribute("class", "bi bi-file-minus");
+            svgIcon.setAttribute("class", "bi bi-dash-circle-dotted");
+            svgIcon.setAttribute("viewBox", "0 0 16 16");
+
+            // Create the path element for the dashed circle with minus
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M8 0q-.264 0-.523.017l.064.998a7 7 0 0 1 .918 0l.064-.998A8 8 0 0 0 8 0M6.44.152q-.52.104-1.012.27l.321.948q.43-.147.884-.237L6.44.153zm4.132.271a8 8 0 0 0-1.011-.27l-.194.98q.453.09.884.237zm1.873.925a8 8 0 0 0-.906-.524l-.443.896q.413.205.793.459zM4.46.824q-.471.233-.905.524l.556.83a7 7 0 0 1 .793-.458zM2.725 1.985q-.394.346-.74.74l.752.66q.303-.345.648-.648zm11.29.74a8 8 0 0 0-.74-.74l-.66.752q.346.303.648.648zm1.161 1.735a8 8 0 0 0-.524-.905l-.83.556q.254.38.458.793l.896-.443zM1.348 3.555q-.292.433-.524.906l.896.443q.205-.413.459-.793zM.423 5.428a8 8 0 0 0-.27 1.011l.98.194q.09-.453.237-.884zM15.848 6.44a8 8 0 0 0-.27-1.012l-.948.321q.147.43.237.884zM.017 7.477a8 8 0 0 0 0 1.046l.998-.064a7 7 0 0 1 0-.918zM16 8a8 8 0 0 0-.017-.523l-.998.064a7 7 0 0 1 0 .918l.998.064A8 8 0 0 0 16 8M.152 9.56q.104.52.27 1.012l.948-.321a7 7 0 0 1-.237-.884l-.98.194zm15.425 1.012q.168-.493.27-1.011l-.98-.194q-.09.453-.237.884zM.824 11.54a8 8 0 0 0 .524.905l.83-.556a7 7 0 0 1-.458-.793zm13.828.905q.292-.434.524-.906l-.896-.443q-.205.413-.459.793zm-12.667.83q.346.394.74.74l.66-.752a7 7 0 0 1-.648-.648zm11.29.74q.394-.346.74-.74l-.752-.66q-.302.346-.648.648zm-1.735 1.161q.471-.233.905-.524l-.556-.83a7 7 0 0 1-.793.458zm-7.985-.524q.434.292.906.524l.443-.896a7 7 0 0 1-.793-.459zm1.873.925q.493.168 1.011.27l.194-.98a7 7 0 0 1-.884-.237zm4.132.271a8 8 0 0 0 1.012-.27l-.321-.948a7 7 0 0 1-.884.237l.194.98zm-2.083.135a8 8 0 0 0 1.046 0l-.064-.998a7 7 0 0 1-.918 0zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z`);
+
+            svgIcon.appendChild(path);
+
+        } else {
+            // Replacing plus with pencil icon
+            svgIcon.setAttribute("class", "bi bi-pencil-square");
             svgIcon.setAttribute("viewBox", "0 0 16 16");
 
             const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path1.setAttribute("d", "M5.5 8a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5");
+            path1.setAttribute("d", "M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z");
 
             const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path2.setAttribute("d", "M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM4 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z");
+            path2.setAttribute("fill-rule", "evenodd");
+            path2.setAttribute("d", "M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z");
 
             svgIcon.appendChild(path1);
             svgIcon.appendChild(path2);
-        } else {
-            svgIcon.setAttribute("class", "bi bi-file-plus-fill");
-            svgIcon.setAttribute("viewBox", "0 0 16 16");
-
-            const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path1.setAttribute("d", "M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M8.5 6v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 1 0");
-
-            svgIcon.appendChild(path1);
         }
 
         // Append the SVG to the button
         button.appendChild(svgIcon);
     }
+
 
     // Function to add a "Revert" button to each row
     function addRevertButton(row) {
@@ -185,7 +208,7 @@ window.onload = function () {
 
         if (!actionTd) {
             actionTd = document.createElement('td');
-            actionTd.classList.add('action-td');  // Add a class for styling
+            actionTd.classList.add('action-td');
 
             const revertButton = document.createElement('button');
             revertButton.classList.add('revert-button');
@@ -219,15 +242,13 @@ window.onload = function () {
                 const countryField = row.querySelector('select[name$="-country"]');
                 const disableCheckbox = row.querySelector('input[name$="-disable"]');
 
-                if (disableCheckbox && disableCheckbox.checked) {
-                    replaceWithTextAndHideField(entryField);
-                    replaceWithTextAndHideField(exitField);
-                    replaceSelectWithTextAndHide(countryField);
-                    replaceCheckboxWithTextAndHide(disableCheckbox);
+                replaceWithTextAndHideField(entryField);
+                replaceWithTextAndHideField(exitField);
+                replaceSelectWithTextAndHide(countryField);
+                replaceCheckboxWithTextAndHide(disableCheckbox);
 
-                    // Add the "Revert" button at the end of the row
-                    addRevertButton(row);
-                }
+                // Add the "Revert" button at the end of the row
+                addRevertButton(row);
 
             });
         }
@@ -243,7 +264,7 @@ window.onload = function () {
             });
 
             // Start observing tbody for child nodes being added
-            observer.observe(tbody, { childList: true });
+            observer.observe(tbody, {childList: true});
         }
     }
 

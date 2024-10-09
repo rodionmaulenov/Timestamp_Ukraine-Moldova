@@ -62,7 +62,7 @@ async def get_random_cat_photo_with_text():
             raise
 
 
-def calculate_dates(instance, control_date, pre_fetched_dates=None):
+def calculate_dates(instance, control_date, pre_fetched_dates=None, country=None):
 
     # Define the Kiev time zone using pytz
     kiev_tz = pytz.timezone('Europe/Kiev')
@@ -83,7 +83,7 @@ def calculate_dates(instance, control_date, pre_fetched_dates=None):
             surrogacy_id=instance.id,
             entry__lte=control_date.date(),
             exit__gte=beginning_180_days.date(),
-            country=instance.country
+            country=instance.country if country is None else country
         ).only('entry', 'exit').iterator(chunk_size=50)
 
     # Iterate through each date record
@@ -220,8 +220,8 @@ def calculate_last_disable_dates_sync():
         latest_dates = Date.objects.filter(
             entry=Subquery(latest_entry_subquery),
             disable=False
-        ).iterator(chunksize=500)
-        return latest_dates
+        )
+        return latest_dates.iterator(chunk_size=1000)
 
 
 def get_last_message():

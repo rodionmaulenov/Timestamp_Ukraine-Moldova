@@ -37,30 +37,7 @@
                 </div>
             </div>
         {% endif %}
-        <!-- Slash between the items -->
-        <span class="slash">/</span>
-        <!-- Slash between the items -->
-        <div class="item-element4">
-            <div class="language">
-                <form action="{% url 'set_language' %}" method="post">
-                    {% csrf_token %}
-
-                    <!-- If the current language is English, show the Russian button -->
-                    {% if LANGUAGE_CODE == 'en-us' %}
-                        <button type="submit" name="language" value="ru" class="language-button">
-                            russian
-                        </button>
-                    {% endif %}
-
-                    <!-- If the current language is Russian, show the English button -->
-                    {% if LANGUAGE_CODE == 'ru' %}
-                        <button type="submit" name="language" value="en-us" class="language-button">
-                            english
-                        </button>
-                    {% endif %}
-                </form>
-            </div>
-        </div>
+    
 
     </div>
 </div>
