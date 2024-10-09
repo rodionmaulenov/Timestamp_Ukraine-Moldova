@@ -1,28 +1,82 @@
-// Function to add copy functionality to the tooltip
-function addCopyFunctionality(tooltipElement) {
-    // Now attach the event listener for the `#copy-deadline` after the tooltip is added
-    const copyButton = tooltipElement.querySelector('#copy-deadline');
-    if (copyButton) {
-        copyButton.addEventListener('click', function() {
-            // Find the next sibling which is the div we want to copy from
-            const contentToCopy = this.closest('.tooltip_content').nextElementSibling.innerText;
+function getTooltipDataExcludingHeader(surrogasyName, tooltipElement) {
+    if (tooltipElement) {
+        const getTooltipContent = tooltipElement.querySelectorAll(
+            '.tooltip_content:not(.tooltip_header)'
+        );
 
-            // Create a temporary input field to copy the text to the clipboard
-            const tempInput = document.createElement('input');
-            tempInput.style.position = 'absolute';
-            tempInput.style.left = '-9999px';
-            document.body.appendChild(tempInput);
-            tempInput.value = contentToCopy;
+        let tooltipData = [];
 
-            // Select and copy the text
-            tempInput.select();
-            document.execCommand('copy');
-
-            // Remove the temporary input field
-            document.body.removeChild(tempInput);
-
-            // Optionally, show a message to confirm copy
-            alert('Text copied to clipboard: ' + contentToCopy);
+        tooltipData.push({
+            name: surrogasyName,
+            span: '',
+            div: ''
         });
+
+        getTooltipContent.forEach(content => {
+
+            const spanText = content.querySelector('span')?.innerText || '';
+
+            const divText = content.querySelector('div')?.innerText || '';
+
+            if (spanText && divText) {
+                tooltipData.push({
+                    span: spanText,
+                    div: divText
+                });
+            }
+        });
+
+        const dataCopy = tooltipData.map(item => {
+            if (item.name) {
+                return `Name: ${item.name}`;
+            }
+            return `${item.span} ${item.div}`;
+        }).join('\n');
+
+        copyToClipboard(dataCopy, tooltipElement);
     }
 }
+
+function copyToClipboard(text, tooltipElement) {
+
+    const temporaryInput = document.createElement('textarea');
+    temporaryInput.style.position = 'absolute';
+    temporaryInput.style.left = '-9999px';
+    temporaryInput.style.top = '0';
+    document.body.appendChild(temporaryInput);
+    temporaryInput.value = text;
+
+    temporaryInput.select();
+    document.execCommand('copy');
+
+    document.body.removeChild(temporaryInput);
+
+    showCopiedTooltip(tooltipElement)
+
+}
+
+
+function showCopiedTooltip(tooltipElement) {
+    const getHoveredElm = tooltipElement.querySelector('.tips');
+
+    const translatedText = gettext('Control dates copied');
+    const svgUrl = '../svg/check-circle.svg';
+
+    // Update the tooltip text and add the class to show the tooltip
+    getHoveredElm.classList.add('successful_copied');
+
+    getHoveredElm.setAttribute('data-tooltip-after', `url(${svgUrl}) ' ${translatedText}'`);
+
+
+    getHoveredElm.addEventListener('mouseleave', () => {
+
+        setTimeout(() => {
+            getHoveredElm.classList.remove('successful_copied');
+            getHoveredElm.removeAttribute('data-tooltip-after');
+        }, 500);
+    });
+}
+
+
+
+

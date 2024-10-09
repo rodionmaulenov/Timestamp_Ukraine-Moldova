@@ -1,7 +1,7 @@
 let activeTooltip = null;
 let activeElement = null;
 
-function toggleTooltip(event, element) {
+function toggleTooltip(surrogasyName, event, element) {
     event.preventDefault();
 
     // When clicking the link `Info`, find the `tooltip_element`
@@ -9,6 +9,11 @@ function toggleTooltip(event, element) {
 
     // If the tooltip is already appended to the body and active, close it
     if (activeTooltip && activeElement === element) {
+        closeTooltip();
+        return;
+    }
+
+    if (activeTooltip) {
         closeTooltip();
         return;
     }
@@ -28,46 +33,17 @@ function toggleTooltip(event, element) {
     activeTooltip = tooltipElement;
     activeElement = element;
 
-    // Copy the data from tooltip
-    addCopyFunctionality(tooltipElement);
+    tipBefore(tooltipElement);
+    svgEffectsWhenClicking(tooltipElement);
 
-    // Initialize Air Datepicker on the date input inside the tooltip
+    const spanForCopyingText = tooltipElement.querySelector('.copy-deadline')
+    spanForCopyingText.addEventListener('click', function () {
+        getTooltipDataExcludingHeader(surrogasyName, tooltipElement);
+    });
+
+    // Initialize Air Datepicker inside the tooltip
     const inputField = tooltipElement.querySelector('input[type="text"]');
-    if (inputField) {
-        $(inputField).datepicker({
-            dateFormat: 'yyyy-mm-dd',
-            autoClose: true,
-            onShow: function (inst) {
-                // Get the dynamically generated datepicker container
-                const datepickerElement = document.querySelector('.datepicker');
-                if (datepickerElement) {
-                    datepickerElement.classList.add('active');  // Add 'active' class when the datepicker is shown
-                    document.removeEventListener('click', handleOutsideClick);
-                }
-            },
-            onHide: function (inst) {
-                // Get the dynamically generated datepicker container
-                const datepickerElement = document.querySelector('.datepicker');
-                if (datepickerElement) {
-                    datepickerElement.classList.remove('active');  // Remove 'active' class when the datepicker is hidden
-                    // Add the outside click listener to close the tooltip
-                    setTimeout(() => {
-                        document.addEventListener('click', handleOutsideClick);
-                    }, 400); // Small delay to ensure tooltip remains open
-                }
-            },
-
-            onSelect: function (formattedDate, date, inst) {
-                const inputField = inst.el;
-                const surrogacyMotherId = inputField.getAttribute('data-mother-id');
-                const surrogacyMotherCountry = inputField.getAttribute('data-mother-country');
-                const country = inputField.getAttribute('data-country');
-
-                // Trigger the calculateDaysLeft function
-                calculateDaysLeftToolTip(surrogacyMotherId, surrogacyMotherCountry, country, formattedDate, tooltipElement);
-            }
-        });
-    }
+    initializeDatePicker(inputField, tooltipElement);
 
     // Prevent the tooltip from closing when clicking inside the tooltip itself
     tooltipElement.addEventListener('click', function (e) {
@@ -106,18 +82,63 @@ function closeTooltip() {
 $(document).ready(function () {
     // Initialize the datepicker with the onSelect event
     $('.datepicker-here').datepicker({
-        dateFormat: 'yyyy-mm-dd',  // Set your desired date format
+        dateFormat: 'yyyy-mm-dd',
         onSelect: function (formattedDate, date, inst) {
-            const inputField = inst.el;  // Get the input field associated with the datepicker
-            const surrogacyMotherId = inputField.getAttribute('data-mother-id');
-            const surrogacyMotherCountry = inputField.getAttribute('data-mother-country');
-            const country = inputField.getAttribute('data-country');
-
-            // Trigger the calculateDaysLeft function
-            calculateDaysLeft(surrogacyMotherId, surrogacyMotherCountry, country, formattedDate);
+            handleDateSelect(formattedDate, date, inst);
         }
     });
 });
+
+
+function initializeDatePicker(inputField, tooltipElement) {
+    if (inputField) {
+        $(inputField).datepicker({
+            dateFormat: 'yyyy-mm-dd',
+            autoClose: true,
+            onShow: function (inst) {
+                // Dynamically get the datepicker element after it is generated
+                const datepickerElement = document.querySelector('.datepicker');
+                if (datepickerElement) {
+                    datepickerElement.classList.add('active');
+                    document.removeEventListener('click', handleOutsideClick);
+                }
+            },
+            onHide: function (inst) {
+                // Dynamically get the datepicker element
+                const datepickerElement = document.querySelector('.datepicker');
+                if (datepickerElement) {
+                    datepickerElement.classList.remove('active');
+
+                    // Re-add the outside click listener with a small delay
+                    // This delay necessary for waiting when air-datepicker closes
+                    // Because otherwise the hint closes after selecting the date.
+
+                    setTimeout(() => {
+                        document.addEventListener('click', handleOutsideClick);
+                    }, 400);
+                }
+            },
+            onSelect: function (formattedDate, date, inst) {
+                handleDateSelect(formattedDate, date, inst, tooltipElement);
+            }
+        });
+    }
+}
+
+
+function handleDateSelect(formattedDate, date, inst, tooltipElement = null) {
+    const inputField = inst.el;  // Get the input field associated with the datepicker
+    const surrogacyMotherId = inputField.getAttribute('data-mother-id');
+    const surrogacyMotherCountry = inputField.getAttribute('data-mother-country');
+    const country = inputField.getAttribute('data-country');
+
+    if (tooltipElement) {
+        calculateDaysLeftToolTip(surrogacyMotherId, surrogacyMotherCountry, country, formattedDate, tooltipElement);
+    } else {
+        calculateDaysLeft(surrogacyMotherId, surrogacyMotherCountry, country, formattedDate);
+    }
+}
+
 
 
 

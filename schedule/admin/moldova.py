@@ -36,7 +36,7 @@ class MoldovaAdmin(admin.ModelAdmin):
         }
         js = "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js", 'js/datepicker.min.js' , \
             'js/i18n/datepicker.en.js', 'js/imageScale.js', 'js/controlDate1.js', 'js/hidePelement.js', \
-            'js/toolTip1.js', 'js/copyControlDate1.js'
+            'js/toolTip1.js', 'js/copyControlDate1.js', 'js/littleTips1.js'
 
     def get_fields(self, request, obj=None):
         if obj:

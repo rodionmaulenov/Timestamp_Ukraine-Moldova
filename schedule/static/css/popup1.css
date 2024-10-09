@@ -1,17 +1,17 @@
 .tooltip_link {
+    font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
     position: relative;
     display: inline-block;
 }
 
 .tooltip_link a {
-    text-decoration: none;
+    text-decoration: underline;
     color: #1f2328;
-    font-weight: 800;
 }
 
 .tooltip_link a:hover {
     text-decoration: underline;
-    color: #1f2328;
+    color: #0073bb;
 }
 
 .tooltip_element {
@@ -24,16 +24,17 @@
     box-shadow: 0px 0px 0px 1px #d1d9e080,
     0px 6px 12px -3px #25292e0a,
     0px 6px 18px 0px #25292e1f;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     max-width: 350px;
     max-height: 350px;
     text-align: left;
     top: 100%;
     left: 0;
-    transform: translateX(-90%);
+    transform: translateX(-83%);
+    white-space: nowrap;
     z-index: 1;
     font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
     color: #16191f;
+    opacity: 0;
 }
 
 
@@ -113,6 +114,7 @@
     font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
     font-size: 14px !important;
     color: #16191f !important;
+    text-decoration: underline;
 }
 
 .choose-date-input:focus {
@@ -127,17 +129,103 @@
     cursor: pointer;
 }
 
-/* When copy styles */
-#copy-deadline {
-    outline: 2px solid transparent;
-    transition: outline-color 0.3s ease;
+/* When click the copy svg element*/
+.copy-deadline {
+    outline: 4px solid transparent;
+    transition: fill 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for fill and shadow */
+    fill: #867e7e; /* Default state */
 }
 
-#copy-deadline:hover {
-    outline-color: #007bff; /* Change this color to your desired highlight color */
+.copy-deadline:hover {
+    fill: #1f2328;
+    cursor: pointer;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+
+}
+
+.copy-deadline.reset-state {
+    fill: #867e7e !important;
+    box-shadow: none !important;
 }
 
 
+/* Tooltip before Copied text */
+.tips {
+    position: relative;
+}
+
+.tips::after {
+    font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+    font-weight: 400;
+    content: attr(data-tooltip-before);
+    white-space: nowrap;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 4px 4px;
+    border: 1px solid #1f2328;
+    background-color: #ffffff;
+    color: #1f2328;
+    font-size: 13px;
+    opacity: 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    text-transform: none;
+    pointer-events: none;
+    transition-delay: .0s; /* No delay for hiding */
+    transition: opacity 0.3s ease;
+}
+
+.tips:hover::after {
+    opacity: 1;
+    text-transform: none;
+    transition: opacity 0.5s ease;
+    transition-delay: .6s;
+}
+
+/* Tooltip before Copied text */
+.successful_copied {
+    position: relative;
+}
+
+.successful_copied::after {
+    text-align: center;
+    font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+    content: url('../svg/check-circle.svg') ' Control dates copied';
+    font-weight: 400;
+    white-space: wrap;
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-30%);
+    width: 120px;
+    max-width: 180px;
+    padding: 5px 5px;
+    border: 1px solid rgba(174, 180, 188, 0.7);
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1d8102;
+    font-size: 14px;
+    opacity: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-transform: none;
+    pointer-events: none;
+    transition-delay: 0s;
+    transition: opacity 0.3s ease;
+}
+
+.successful_copied:hover::after {
+    opacity: 1;
+    text-transform: none;
+    transition: opacity 0.3s ease;
+    transition-delay: .5s;
+}
+
+.check_circle {
+    fill: #1d8102;
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -151,10 +239,11 @@
     /* Center the datepicker on mobile */
     .datepicker {
         transform: translate(-50%, -50%) !important; /* Adjust position to truly center */
-        width: 90vw !important; /* Make sure the datepicker fits within the screen width */
-        max-width: 320px !important; /* Optional: set a max width */
+        width: 70vw !important; /* Make sure the datepicker fits within the screen width */
+        max-width: 280px !important; /* Optional: set a max width */
         z-index: 9999 !important; /* Ensure it stays on top */
     }
 }
+
 
 

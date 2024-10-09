@@ -1,10 +1,15 @@
-// Function to show the input field again and reinitialize the jQuery datepicker
-function showInputField(surrogacyMotherId, surrogacyMotherCountry, country) {
-    const divContainerId = 'control-date-container-' + surrogacyMotherId + '-' + country;
-    const divContainer = document.getElementById(divContainerId);
+// Generalized function to show the input field and reinitialize the jQuery datepicker
+function showInputFieldGeneric(surrogacyMotherId, surrogacyMotherCountry, country, tooltipElement = null, isTooltip = false) {
+    const divContainerId = isTooltip
+        ? 'days-left-tooltip-' + surrogacyMotherId + '-' + country
+        : 'control-date-container-' + surrogacyMotherId + '-' + country;
 
-    // Clear the container to remove the existing content
-    divContainer.innerHTML = '';
+    // Get the parent container for tooltips or directly the container for normal input
+    const divContainer = isTooltip
+        ? document.getElementById(divContainerId).parentElement
+        : document.getElementById(divContainerId);
+
+    divContainer.innerHTML = '';  // Clear the container to remove existing content
 
     // Create the new input field
     const recreateField = document.createElement('input');
@@ -12,8 +17,6 @@ function showInputField(surrogacyMotherId, surrogacyMotherCountry, country) {
     recreateField.id = `control-date-${surrogacyMotherId}-${country}`;
     recreateField.className = 'datepicker-here choose-date-input';
     recreateField.placeholder = 'choose date';
-
-    // Add the required data-* attributes
     recreateField.setAttribute('data-mother-id', surrogacyMotherId);
     recreateField.setAttribute('data-mother-country', surrogacyMotherCountry);
     recreateField.setAttribute('data-country', country);
@@ -21,78 +24,19 @@ function showInputField(surrogacyMotherId, surrogacyMotherCountry, country) {
     // Append the new input field to the container
     divContainer.appendChild(recreateField);
 
-    // Now initialize the jQuery datepicker on the new field
-    $(recreateField).datepicker({
-        dateFormat: 'yyyy-mm-dd',  // Set your desired date format
-        onSelect: function (formattedDate, date, inst) {
-            const inputField = inst.el;
-            const surrogacyMotherId = inputField.getAttribute('data-mother-id');
-            const surrogacyMotherCountry = inputField.getAttribute('data-mother-country');
-            const country = inputField.getAttribute('data-country');
-
-            // Trigger the calculateDaysLeft function
-            calculateDaysLeft(surrogacyMotherId, surrogacyMotherCountry, country, formattedDate);
-        }
-    });
-}
-
-
-// Function to show the input field again and reinitialize the jQuery datepicker
-function showInputFieldToolTip(surrogacyMotherId, surrogacyMotherCountry, country, tooltipElement = null) {
-    const divContainerId = 'days-left-tooltip-' + surrogacyMotherId + '-' + country;
-    const divContainer = document.getElementById(divContainerId).parentElement;
-
-    // Clear the existing content of the container
-    divContainer.innerHTML = '';
-
-    // Recreate the input field with placeholder 'choose date'
-    const recreateField = document.createElement('input');
-    recreateField.type = 'text';
-    recreateField.id = `control-date-${surrogacyMotherId}-${country}`;
-    recreateField.setAttribute('data-mother-id', surrogacyMotherId);
-    recreateField.setAttribute('data-mother-country', surrogacyMotherCountry);
-    recreateField.setAttribute('data-country', country);
-    recreateField.className = 'datepicker-here choose-date-input';
-    recreateField.placeholder = 'choose date'; // Show placeholder text 'choose date'
-
-    // Append the input field to the div container
-    divContainer.appendChild(recreateField);
-
     // Reinitialize the jQuery datepicker on the new input field
-    $(recreateField).datepicker({
-        dateFormat: 'yyyy-mm-dd',
-        autoClose: true,
-        onShow: function (inst) {
-            // Get the dynamically generated datepicker container
-            const datepickerElement = document.querySelector('.datepicker');
-            if (datepickerElement) {
-                datepickerElement.classList.add('active');  // Add 'active' class when the datepicker is shown
-                document.removeEventListener('click', handleOutsideClick);
+    if (isTooltip) {
+        // Initialize with tooltipElement for tooltips
+        initializeDatePicker(recreateField, tooltipElement);
+    } else {
+        // Initialize without tooltipElement for normal input
+        $(recreateField).datepicker({
+            dateFormat: 'yyyy-mm-dd',
+            onSelect: function (formattedDate, date, inst) {
+                handleDateSelect(formattedDate, date, inst);
             }
-        },
-        onHide: function (inst) {
-            // Get the dynamically generated datepicker container
-            const datepickerElement = document.querySelector('.datepicker');
-            if (datepickerElement) {
-                datepickerElement.classList.remove('active');  // Remove 'active' class when the datepicker is hidden
-                // Add the outside click listener to close the tooltip
-                setTimeout(() => {
-                    document.addEventListener('click', handleOutsideClick);
-                }, 400); // Small delay to ensure tooltip remains open
-            }
-        },
-
-        onSelect: function (formattedDate, date, inst) {
-            const inputField = inst.el;
-            const surrogacyMotherId = inputField.getAttribute('data-mother-id');
-            const surrogacyMotherCountry = inputField.getAttribute('data-mother-country');
-            const country = inputField.getAttribute('data-country');
-
-            // Trigger the calculateDaysLeft function
-            calculateDaysLeftToolTip(surrogacyMotherId, surrogacyMotherCountry, country, formattedDate, tooltipElement);
-        }
-    });
-
+        });
+    }
 }
 
 
@@ -124,7 +68,6 @@ function calculateDaysLeft(surrogacyMotherId, surrogacyMotherCountry, country, s
 
     const inputFieldId = 'control-date-' + surrogacyMotherId + '-' + country;
     const inputField = document.getElementById(inputFieldId);
-    // const controlDate = inputField.value;
 
     const controlDate = selectedDate
 
@@ -153,10 +96,9 @@ function calculateDaysLeft(surrogacyMotherId, surrogacyMotherCountry, country, s
 
             if (xhr.status === 200 && xhr.response && xhr.response.days_left !== undefined) {
                 const daysLeft = xhr.response.days_left;
-
                 const daysLeftSpan = document.createElement('span');
                 daysLeftSpan.id = `days-left-${surrogacyMotherId}-${country}`;
-                daysLeftSpan.textContent = `appeared days ${daysLeft}`;
+                daysLeftSpan.textContent = 'appeared days' + ` ${daysLeft}`;
                 daysLeftSpan.className = 'days_left';
 
                 divContainer.removeChild(inputField);
@@ -167,7 +109,7 @@ function calculateDaysLeft(surrogacyMotherId, surrogacyMotherCountry, country, s
                 }, 10);
 
                 daysLeftSpan.addEventListener('click', function () {
-                    showInputField(surrogacyMotherId, surrogacyMotherCountry, country);
+                    showInputFieldGeneric(surrogacyMotherId, surrogacyMotherCountry, country);
                 });
 
             }
@@ -207,7 +149,7 @@ function calculateDaysLeftToolTip(surrogacyMotherId, surrogacyMotherCountry,
                     // Create a new span element for displaying the days left
                     const daysLeftSpan = document.createElement('span');
                     daysLeftSpan.id = `days-left-tooltip-${surrogacyMotherId}-${country}`;
-                    daysLeftSpan.textContent = `appeared days ${daysLeft}`;
+                    daysLeftSpan.textContent = 'appeared days' + ` ${daysLeft}`;
                     daysLeftSpan.className = 'days_left_tooltip';
 
                     // Remove the input field and append the days left span
@@ -220,7 +162,7 @@ function calculateDaysLeftToolTip(surrogacyMotherId, surrogacyMotherCountry,
 
                     // Make the span clickable to show the input field again
                     daysLeftSpan.addEventListener('click', function () {
-                        showInputFieldToolTip(surrogacyMotherId, surrogacyMotherCountry, country, tooltipElement);
+                        showInputFieldGeneric(surrogacyMotherId, surrogacyMotherCountry, country, tooltipElement);
                     });
                 }
             } else {

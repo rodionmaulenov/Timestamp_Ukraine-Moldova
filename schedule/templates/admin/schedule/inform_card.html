@@ -1,19 +1,19 @@
+{% load static %}
+
 <div class="tooltip">
     <div id="inform-card-container-{{ obj.pk }}" class="tooltip_link">
         <!-- Link for pop-up inform card -->
-        <a href="#" onclick="toggleTooltip(event, this)">
-            info
+        <a href="#" onclick="toggleTooltip('{{ obj.name }}', event, this)">
+            check
         </a>
-
     </div>
 
     <div class="tooltip_element">
+
         <div class="tooltip_content tooltip_additional tooltip_header">
-            <svg  id="copy-deadline"  xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-copy"
-                 viewBox="0 0 16 16">
-                <path fill-rule="evenodd"
-                      d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
-            </svg>
+            <div class="tips" data-tooltip-before="Copy control dates to clipboard">
+                <img class="copy-deadline" src="{% static 'svg/copy.svg' %}" alt="Copy control dates">
+            </div>
             <span>Ukraine deadlines</span>
         </div>
 
@@ -39,4 +39,5 @@
 
     </div>
 </div>
+
 

@@ -1,0 +1,6 @@
+<svg  class="check_circle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#1d8102" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Circle -->
+  <circle cx="8" cy="8" r="7"></circle>
+  <!-- Checkmark -->
+  <path d="M4 8l3 3l5-5"></path>
+</svg>
