@@ -175,7 +175,7 @@ class UkraineAdmin(admin.ModelAdmin):
         control_date = datetime.strptime(control_date, '%Y-%m-%d')
         obj = self.get_queryset(request).get(pk=surrogacy_mother_id)
 
-        days_left, _ = calculate_dates(obj, control_date, country='UKR')
+        days_left, _ = calculate_dates(obj, control_date, country='MLD')
         return JsonResponse({'days_left': days_left})
 
 
