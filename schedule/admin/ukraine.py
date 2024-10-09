@@ -27,13 +27,16 @@ class UkraineAdmin(admin.ModelAdmin):
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = NewCountryDateInline,
-    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date', "control_date"
+    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date', \
+        'mld_inform_card_link'
 
     class Media:
         css = {
-            'all': ('css/image_scale.css',)
+            'all': ('css/datepicker.min.css', 'css/image_scale.css', 'css/popup1.css',)
         }
-        js = 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js', 'js/preventSubmit.js'
+        js = "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js", 'js/datepicker.min.js', \
+            'js/i18n/datepicker.en.js', 'js/imageScale.js', 'js/controlDate1.js', 'js/hidePelement.js', \
+            'js/toolTip1.js', 'js/copyControlDate1.js', 'js/littleTips1.js'
 
     def get_fields(self, request, obj=None):
         if obj:
@@ -43,36 +46,64 @@ class UkraineAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         # Subquery to fetch the latest date for each SurrogacyMother
-        latest_date_subquery = Date.objects.filter(
+        latest_date_mld_subquery = Date.objects.filter(
+            surrogacy_id=OuterRef('surrogacy_id'),
+            country='MLD'
+        ).order_by('-exit').values('id')[:1]
+
+        latest_date_ukr_subquery = Date.objects.filter(
             surrogacy_id=OuterRef('surrogacy_id'),
             country='UKR'
         ).order_by('-exit').values('id')[:1]
 
-        latest_date_qs = Date.objects.filter(id=Subquery(latest_date_subquery)).only('surrogacy', 'exit')
-
+        latest_date_mld_qs = Date.objects.filter(id=Subquery(latest_date_mld_subquery)).only('surrogacy', 'exit')
+        latest_date_ukr_qs = Date.objects.filter(id=Subquery(latest_date_ukr_subquery)).only('surrogacy', 'exit')
         all_dates_qs = Date.objects.filter(country='UKR').only('surrogacy', 'entry', 'exit')
 
         return SurrogacyMother.objects.only('name', 'country', 'file').prefetch_related(
-            Prefetch('choose_dates', queryset=latest_date_qs, to_attr='latest_date'),
+            Prefetch('choose_dates', queryset=latest_date_mld_qs, to_attr='latest_date_mld'),
+            Prefetch('choose_dates', queryset=latest_date_ukr_qs, to_attr='latest_date_ukr'),
             Prefetch('choose_dates', queryset=all_dates_qs, to_attr='prefetched_dates')
         ).filter(country='UKR')
 
 
-    @admin.action(description=_('Control date'))
-    def control_date(self, obj):
-        return format_html((render_to_string('admin/schedule/control_date.html', {'obj': obj})))
+    @admin.action(description=_('Control dates Moldova'))
+    def mld_inform_card_link(self, obj):
+        return format_html((render_to_string('admin/schedule/inform_card.html',
+                                             {
+                                                 'obj': obj,
+                                                 'country': 'MLD',
+                                                 'update_date_ukr': self.get_update_date_in_mld(obj)
+                                             })))
+
+
+    @admin.action(description=_('Update Date Moldova'))
+    def get_update_date_in_mld(self, obj):
+        kiev_tz = pytz.timezone('Europe/Kiev')
+
+        if hasattr(obj, 'latest_date_mld') and obj.latest_date_mld:
+            date_obj = obj.latest_date_mld[0]
+
+            control_date = date_obj.exit
+            date_time = datetime.combine(control_date, datetime.min.time())
+            localize_date = kiev_tz.localize(date_time)
+
+            return (localize_date + timedelta(days=91)).date()
+
+        return _('Has`t been in Ukraine')
+
 
     def get_latest_date(self, obj):
         """
         Use the prefetched 'latest_date' to avoid hitting the database multiple times.
         """
-        if hasattr(obj, 'latest_date') and obj.latest_date:
-            return obj.latest_date[0]
+        if hasattr(obj, 'latest_date_ukr') and obj.latest_date_ukr:
+            return obj.latest_date_ukr[0]
         return None
+
 
     @admin.action(description=_('Update Date'))
     def get_update_date(self, obj):
-
         kiev_tz = pytz.timezone('Europe/Kiev')
 
         date_obj = self.get_latest_date(obj)
@@ -85,9 +116,9 @@ class UkraineAdmin(admin.ModelAdmin):
 
             return (localize_date + timedelta(days=91)).date()
 
+
     @admin.action(description=_('Days have passed'))
     def get_days_spent(self, obj):
-
         date_obj = self.get_latest_date(obj)
 
         if date_obj is not None:
@@ -97,9 +128,9 @@ class UkraineAdmin(admin.ModelAdmin):
 
             return total_days_stayed
 
+
     @admin.action(description=_('Days left'))
     def get_days_exist(self, obj):
-
         date_obj = self.get_latest_date(obj)
 
         if date_obj is not None:
@@ -108,6 +139,7 @@ class UkraineAdmin(admin.ModelAdmin):
             days_left, _ = calculate_dates(obj, control_date, pre_fetched_dates=obj.prefetched_dates)
 
             return days_left
+
 
     @admin.action(description=_('Image'))
     def get_html_photo(self, obj):
@@ -126,25 +158,26 @@ class UkraineAdmin(admin.ModelAdmin):
                 )
         return '-'
 
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('calculate_control_date/', self.admin_site.admin_view(self.calculate_control_date),
-                 name='calculate-control-date'),
+            path('calculate_control_date_in_mld/', self.admin_site.admin_view(self.calculate_control_date_in_mld),
+                 name='calculate-control-date-ukr'),
         ]
         return custom_urls + urls
 
-    def calculate_control_date(self, request):
+    def calculate_control_date_in_mld(self, request):
 
         surrogacy_mother_id = request.GET.get('id')
         control_date = request.GET.get('control_date')
 
         control_date = datetime.strptime(control_date, '%Y-%m-%d')
-        obj = SurrogacyMother.objects.get(pk=surrogacy_mother_id)
+        obj = self.get_queryset(request).get(pk=surrogacy_mother_id)
 
-        days_left, _ = calculate_dates(obj, control_date)
-
+        days_left, _ = calculate_dates(obj, control_date, country='UKR')
         return JsonResponse({'days_left': days_left})
+
 
     def save_related(self, request, form, formsets, change):
         """

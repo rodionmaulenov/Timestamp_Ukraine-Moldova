@@ -54,7 +54,7 @@ class NewCountryDateInline(TabularInline):
 
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return True
 
     def has_add_permission(self, request, obj):
         return True
