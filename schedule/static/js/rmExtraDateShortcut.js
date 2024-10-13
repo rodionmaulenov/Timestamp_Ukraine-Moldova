@@ -28,7 +28,7 @@ function cleanupDateShortcutsAndWarnings() {
 
         nodes.forEach(function (node) {
             if (node.nodeType === Node.ELEMENT_NODE && !(node.id && node.id.startsWith('calendarlink'))) {
-                // node.remove();
+                node.remove();
             } else if (node.nodeType === Node.TEXT_NODE) {
                 node.remove();
             }
