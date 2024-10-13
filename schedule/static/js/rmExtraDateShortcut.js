@@ -8,6 +8,7 @@ function observeForChanges() {
         for (const mutation of mutationsList) {
             if (mutation.type === 'childList') {
                 cleanupDateShortcutsAndWarnings()
+                initDateTimeShortcutsOverride()
                 initializeCalendarListeners()
             }
         }
@@ -97,7 +98,6 @@ function toggleCalendar(calendarBoxId) {
     const calendarBox = document.getElementById(calendarBoxId);
     // Close the currently active calendar if it's different from the one being opened
     if (activeCalendar && activeCalendar !== calendarBox) {
-        console.log('display none')
         activeCalendar.style.display = 'none';
         activeCalendar = null;
     }
