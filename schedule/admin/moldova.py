@@ -40,7 +40,7 @@ class MoldovaAdmin(admin.ModelAdmin):
             'all': ('admin/css/widgets.css', 'css/image_scale.css', 'css/tooltip.css', 'css/djangoDateField.css')
         }
         js = ('admin/js/vendor/jquery/jquery.js', 'admin/js/jquery.init.js', 'admin/js/actions.js',
-              'admin/js/calendar.js', 'admin/js/admin/DateTimeShortcuts.js'
+              'admin/js/calendar.js', 'admin/js/admin/DateTimeShortcuts.js',
 
 
             'js/rmExtraDateShortcut.js', 'js/imageScale.js', 'js/hidePelement.js', 'js/calculateDatesByURL.js',
