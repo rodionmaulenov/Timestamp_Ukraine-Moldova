@@ -28,13 +28,19 @@ class NewCountryDateInline(TabularInline):
     template = 'admin/schedule/date/tabular.html'
     ordering = 'entry', 'exit'
 
-
     # class Media:
     #     css = {
     #         'all': ('css/tabular/tabular_date.css',)
     #     }
     #
     #     js =   'js/rmHelpText.js', 'js/tabular/foldUnfoldRows.js', 'js/tabular/changeRowMode.js',
+
+    def get_fields(self, request, obj=None):
+
+        if obj:
+            return ['entry', 'exit', 'calculate_days', 'disable', 'country']
+        else:
+            return ['entry', 'exit', 'disable', 'country']
 
     def calculate_days(self, obj):
         if obj is not None:
