@@ -79,7 +79,7 @@ class UkraineAdmin(admin.ModelAdmin):
                 return format_html(
                     """
                     <div class='image-container'>
-                        <a href="#" class="view-photo-link">view image</a>
+                        <a href="#" class="view-photo-link">view</a>
                         <img src='{}' class='hoverable-image' style="display:none;" />
                     </div>
                     """, file_url
