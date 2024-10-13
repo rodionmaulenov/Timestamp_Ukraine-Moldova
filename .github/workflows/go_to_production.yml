@@ -83,7 +83,7 @@ jobs:
           scp ./docker_prod/docker-compose.prod.yml .env \
           ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }}:/home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
 
-      - name: Pull Docker images and Get ssl key
+      - name: Pull Docker images
         run: |
           ssh ${{ secrets.USER_FOR_EC2 }}@${{ secrets.EC2_SERVER_IP }} /bin/bash << EOF
             cd /home/${{ secrets.USER_FOR_EC2 }}/timestamp_app
