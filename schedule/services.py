@@ -202,7 +202,7 @@ def calculate_last_disable_dates_sync():
 
 def get_last_message():
     with transaction.atomic():
-        return Message.objects.order_by('-created_at').first()
+        return Message.objects.order_by('-timestamp').first()
 
 
 def delete_last_message(last_message):
