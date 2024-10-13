@@ -70,7 +70,7 @@ def send_message_to_work_group(self):
             one_hour_ago = timezone.now() - timedelta(hours=1)
             existing_message = await sync_to_async(lambda: Message.objects.filter(
                 message_hash=message_hash,
-                created_at__gte=one_hour_ago
+                timestamp__gte=one_hour_ago
             ).exists())()
 
             if existing_message:
