@@ -6,8 +6,6 @@ media
 docker-compose.dev.yml
 Dockerfiledev
 .github
-deploy_sh
-docker_gen_ssl
 
 # Python bytecode and cache directories
 __pycache__/
