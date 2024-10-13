@@ -1,14 +1,3 @@
-<div id="control-date-container-{{ obj.pk }}-{{ country }}">
-    <input type="text"
-           id="control-date-{{ obj.pk }}-{{ country }}"
-           data-mother-id="{{ obj.pk }}"
-           data-mother-country="{{ obj.country }}"
-           data-country="{{ country }}"
-           class="vDateField"/>
-
-</div>
-
-{##}
 {#<div id="control-date-container-{{ obj.pk }}-{{ country }}">#}
 {#    <input type="text"#}
 {#           id="control-date-{{ obj.pk }}-{{ country }}"#}
@@ -18,6 +7,23 @@
 {#           class="vDateField"/>#}
 {##}
 {#</div>#}
+
+
+<div id="control-date-container-{{ obj.pk }}-{{ country }}">
+    <input type="text"
+           id="control-date-{{ obj.pk }}-{{ country }}"
+           data-mother-id="{{ obj.pk }}"
+           data-mother-country="{{ obj.country }}"
+           data-country="{{ country }}"
+           class="vDateField"/>
+
+    <span class="datetimeshortcuts">
+        <a href="#" id="calendarlink2">
+            <span class="date-icon" title="Choose a Date"></span>
+        </a>
+    </span>
+
+</div>
 
 
 
