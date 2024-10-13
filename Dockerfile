@@ -35,7 +35,6 @@ RUN apk --no-cache add --virtual .build-deps \
     && rm -rf /var/cache/apk/* \
     && chmod +x ./deploy_sh/entrypoint.sh \
     && chmod +x ./deploy_sh/wait-for-web.sh \
-    && chmod -R 755 ./static
 
 ENTRYPOINT ["/usr/src/app/deploy_sh/entrypoint.sh"]
 
