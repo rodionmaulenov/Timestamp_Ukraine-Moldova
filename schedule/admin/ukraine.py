@@ -3,13 +3,15 @@ from django.contrib import admin
 from datetime import timedelta, datetime
 from django.db.models import OuterRef, Prefetch, Subquery
 from django.utils.safestring import mark_safe
+
+from schedule.admin.moldova import ControlDateForm
 from schedule.inlines import NewCountryDateInline
 from django.utils.html import format_html
 from django.urls import path
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from schedule.models import SurrogacyMother, Ukraine, Date
-from schedule.services import calculate_dates
+from schedule.services import calculate_dates, find_when_15_days_left
 from django.utils.translation import gettext_lazy as _
 
 
@@ -23,20 +25,18 @@ class UkraineAdmin(admin.ModelAdmin):
         "4. <b>Control date</b>: Allows you to check the status for a specific date.")
     )
     list_per_page = 15
-    ordering = '-created',
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = NewCountryDateInline,
-    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'get_update_date', \
-        'mld_inform_card_link'
+    list_display = 'name', 'get_html_photo', 'get_days_spent', 'get_days_exist', 'when_15_days_left', 'get_update_date', \
+        'control_date_ukr', 'mld_inform_card_link',
 
     class Media:
         css = {
-            'all': ('css/datepicker.min.css', 'css/image_scale.css', 'css/popup1.css',)
+            'all': ('css/image_scale.css', 'css/tooltip.css', 'css/djangoDateField.css')
         }
-        js = "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js", 'js/datepicker.min.js', \
-            'js/i18n/datepicker.en.js', 'js/imageScale.js', 'js/controlDate1.js', 'js/hidePelement.js', \
-            'js/toolTip1.js', 'js/copyControlDate1.js', 'js/littleTips1.js'
+        js = 'js/rmExtraDateShortcut.js', 'js/imageScale.js', 'js/hidePelement.js', 'js/calculateDatesByURL.js', \
+            'js/toggleTooltip.js', 'js/copyCalcDatesToClipboard.js', 'js/tips.js',
 
     def get_fields(self, request, obj=None):
         if obj:
@@ -45,101 +45,28 @@ class UkraineAdmin(admin.ModelAdmin):
             return ['name', 'related_mother', 'file']
 
     def get_queryset(self, request):
-        # Subquery to fetch the latest date for each SurrogacyMother
         latest_date_mld_subquery = Date.objects.filter(
-            surrogacy_id=OuterRef('surrogacy_id'),
+            surrogacy_id=OuterRef('pk'),
             country='MLD'
-        ).order_by('-exit').values('id')[:1]
+        ).order_by('-exit').values('exit')[:1]
 
         latest_date_ukr_subquery = Date.objects.filter(
-            surrogacy_id=OuterRef('surrogacy_id'),
+            surrogacy_id=OuterRef('pk'),
             country='UKR'
-        ).order_by('-exit').values('id')[:1]
+        ).order_by('-exit').values('exit')[:1]
 
-        latest_date_mld_qs = Date.objects.filter(id=Subquery(latest_date_mld_subquery)).only('surrogacy', 'exit')
-        latest_date_ukr_qs = Date.objects.filter(id=Subquery(latest_date_ukr_subquery)).only('surrogacy', 'exit')
+        queryset = SurrogacyMother.objects.annotate(
+            latest_date_mld=Subquery(latest_date_mld_subquery),
+            latest_date_ukr=Subquery(latest_date_ukr_subquery)
+        ).only('name', 'country', 'file')
+
         all_dates_qs = Date.objects.filter(country='UKR').only('surrogacy', 'entry', 'exit')
 
-        return SurrogacyMother.objects.only('name', 'country', 'file').prefetch_related(
-            Prefetch('choose_dates', queryset=latest_date_mld_qs, to_attr='latest_date_mld'),
-            Prefetch('choose_dates', queryset=latest_date_ukr_qs, to_attr='latest_date_ukr'),
+        queryset = queryset.only('name', 'country', 'file').prefetch_related(
             Prefetch('choose_dates', queryset=all_dates_qs, to_attr='prefetched_dates')
         ).filter(country='UKR')
 
-
-    @admin.action(description=_('Control dates Moldova'))
-    def mld_inform_card_link(self, obj):
-        return format_html((render_to_string('admin/schedule/inform_card.html',
-                                             {
-                                                 'obj': obj,
-                                                 'country': 'MLD',
-                                                 'update_date_ukr': self.get_update_date_in_mld(obj)
-                                             })))
-
-
-    @admin.action(description=_('Update Date Moldova'))
-    def get_update_date_in_mld(self, obj):
-        kiev_tz = pytz.timezone('Europe/Kiev')
-
-        if hasattr(obj, 'latest_date_mld') and obj.latest_date_mld:
-            date_obj = obj.latest_date_mld[0]
-
-            control_date = date_obj.exit
-            date_time = datetime.combine(control_date, datetime.min.time())
-            localize_date = kiev_tz.localize(date_time)
-
-            return (localize_date + timedelta(days=91)).date()
-
-        return _('Has`t been in Ukraine')
-
-
-    def get_latest_date(self, obj):
-        """
-        Use the prefetched 'latest_date' to avoid hitting the database multiple times.
-        """
-        if hasattr(obj, 'latest_date_ukr') and obj.latest_date_ukr:
-            return obj.latest_date_ukr[0]
-        return None
-
-
-    @admin.action(description=_('Update Date'))
-    def get_update_date(self, obj):
-        kiev_tz = pytz.timezone('Europe/Kiev')
-
-        date_obj = self.get_latest_date(obj)
-
-        if date_obj is not None:
-            control_date = date_obj.exit
-
-            date_time = datetime.combine(control_date, datetime.min.time())
-            localize_date = kiev_tz.localize(date_time)
-
-            return (localize_date + timedelta(days=91)).date()
-
-
-    @admin.action(description=_('Days have passed'))
-    def get_days_spent(self, obj):
-        date_obj = self.get_latest_date(obj)
-
-        if date_obj is not None:
-            control_date = date_obj.exit
-
-            _, total_days_stayed = calculate_dates(obj, control_date, pre_fetched_dates=obj.prefetched_dates)
-
-            return total_days_stayed
-
-
-    @admin.action(description=_('Days left'))
-    def get_days_exist(self, obj):
-        date_obj = self.get_latest_date(obj)
-
-        if date_obj is not None:
-            control_date = date_obj.exit
-
-            days_left, _ = calculate_dates(obj, control_date, pre_fetched_dates=obj.prefetched_dates)
-
-            return days_left
-
+        return queryset
 
     @admin.action(description=_('Image'))
     def get_html_photo(self, obj):
@@ -152,20 +79,113 @@ class UkraineAdmin(admin.ModelAdmin):
                 return format_html(
                     """
                     <div class='image-container'>
-                        <img src='{}' class='hoverable-image' />
+                        <a href="#" class="view-photo-link">view image</a>
+                        <img src='{}' class='hoverable-image' style="display:none;" />
                     </div>
                     """, file_url
                 )
         return '-'
 
+    @staticmethod
+    def get_latest_exit(obj):
+        if obj is not None:
+            if hasattr(obj, 'latest_date_ukr') and obj.latest_date_ukr:
+                return obj.latest_date_ukr
+        return
+
+    @admin.action(description=_('Days have passed'))
+    def get_days_spent(self, obj):
+        control_date = self.get_latest_exit(obj)
+
+        _, total_days_stayed = calculate_dates(obj, control_date, pre_fetched_dates=obj.prefetched_dates)
+
+        return total_days_stayed
+
+    @admin.action(description=_('Days left'))
+    def get_days_exist(self, obj):
+        control_date = self.get_latest_exit(obj)
+
+        days_left, _ = calculate_dates(obj, control_date, pre_fetched_dates=obj.prefetched_dates)
+
+        return days_left
+
+    @admin.action(description=_('When 15 days left'))
+    def when_15_days_left(self, obj):
+        control_date = self.get_latest_exit(obj)
+
+        date_15_days_left = find_when_15_days_left(obj, control_date, pre_fetched_dates=obj.prefetched_dates)
+
+        return date_15_days_left
+
+    @admin.action(description=_('Update Date'))
+    def get_update_date(self, obj):
+        kiev_tz = pytz.timezone('Europe/Kiev')
+
+        control_date = self.get_latest_exit(obj)
+
+        date_time = datetime.combine(control_date, datetime.min.time())
+        localize_date = kiev_tz.localize(date_time)
+
+        return (localize_date + timedelta(days=91)).date()
 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             path('calculate_control_date_in_mld/', self.admin_site.admin_view(self.calculate_control_date_in_mld),
                  name='calculate-control-date-ukr'),
+            path('calculate_control_date/', self.admin_site.admin_view(self.calculate_control_date),
+                 name='calculate-control-date-ukr'),
         ]
         return custom_urls + urls
+
+    @admin.action(description=_('Control date'))
+    def control_date_ukr(self, obj):
+
+        form = ControlDateForm()
+
+        rendered_html = render_to_string('admin/schedule/control_date.html', {
+            'form': form,
+            'obj': obj,
+            'country': 'UKR',
+        })
+
+        # Safely render the HTML in the admin
+        return format_html(rendered_html)
+
+    @staticmethod
+    def calculate_control_date(request):
+
+        surrogacy_mother_id = request.GET.get('id')
+        control_date = request.GET.get('control_date')
+
+        control_date = datetime.strptime(control_date, '%Y-%m-%d')
+        obj = SurrogacyMother.objects.get(pk=surrogacy_mother_id)
+
+        days_left, _ = calculate_dates(obj, control_date, last_equal_control_date=True)
+        return JsonResponse({'days_left': days_left})
+
+    @admin.action(description=_('Control dates Moldova'))
+    def mld_inform_card_link(self, obj):
+        return format_html((render_to_string('admin/schedule/inform_card.html',
+                                             {
+                                                 'obj': obj,
+                                                 'country': 'MLD',
+                                                 'update_date_ukr': self.get_update_date_in_mld(obj)
+                                             })))
+
+    @admin.action(description=_('Update Date Moldova'))
+    def get_update_date_in_mld(self, obj):
+        kiev_tz = pytz.timezone('Europe/Kiev')
+
+        if hasattr(obj, 'latest_date_mld') and obj.latest_date_mld:
+            control_date = obj.latest_date_mld
+
+            date_time = datetime.combine(control_date, datetime.min.time())
+            localize_date = kiev_tz.localize(date_time)
+
+            return (localize_date + timedelta(days=91)).date()
+
+        return _('Has`t been in Ukraine')
 
     def calculate_control_date_in_mld(self, request):
 

@@ -62,49 +62,47 @@ async def get_random_cat_photo_with_text():
             raise
 
 
-def calculate_dates(instance, control_date, pre_fetched_dates=None, country=None):
+def calculate_dates(instance, control_date, pre_fetched_dates=None, country=None, last_equal_control_date=False):
+    if pre_fetched_dates is not None and country is not None:
+        raise ValueError("You cannot use 'country' when 'pre_fetched_dates' is provided.")
 
-    # Define the Kiev time zone using pytz
     kiev_tz = pytz.timezone('Europe/Kiev')
-    # Assuming control_date is a date object; convert it to a datetime object at midnight
-    control_date = datetime.combine(control_date, datetime.min.time())
+
     # Convert control_date to a timezone-aware datetime object in Kiev timezone
-    control_date = kiev_tz.localize(control_date)
+    control_date = kiev_tz.localize(datetime.combine(control_date, datetime.min.time()))
+
     # Calculate the start of the 180-day period at midnight in Kiev timezone
     beginning_180_days = control_date - timedelta(days=179)
+
     # Initialize total days stayed within the 180-day window
     total_days_stayed = 0
 
     if pre_fetched_dates is not None:
-        dates = pre_fetched_dates
+        dates = [date for date in pre_fetched_dates
+                 if date.entry <= control_date.date() and date.exit >= beginning_180_days.date()]
     else:
-        # Fetch relevant dates; ensure your Date model has datetime fields
-        dates = Date.objects.filter(
+        dates = list(Date.objects.filter(
             surrogacy_id=instance.id,
             entry__lte=control_date.date(),
             exit__gte=beginning_180_days.date(),
             country=instance.country if country is None else country
-        ).only('entry', 'exit').iterator(chunk_size=50)
+        ).only('entry', 'exit').iterator(chunk_size=50))
 
-    # Iterate through each date record
-    for date in dates:
+    for i, date in enumerate(dates):
 
-        # Convert entry and exit dates to datetime objects at midnight in Kiev timezone
-        make_datetime_entry = datetime.combine(date.entry, datetime.min.time())
-        entry_date = kiev_tz.localize(make_datetime_entry)
+        entry_date = kiev_tz.localize(datetime.combine(date.entry, datetime.min.time()))
+        exit_date = kiev_tz.localize(datetime.combine(date.exit, datetime.min.time()))
 
-        make_datetime_exit = datetime.combine(date.exit, datetime.min.time())
-        exit_date = kiev_tz.localize(make_datetime_exit)
-
-        # Adjust entry_date and exit_date to fit within the 180-day period
-        entry_date = max(entry_date, beginning_180_days)
-        exit_date = min(exit_date, control_date)
+        # For all dates except the last one, adjust the exit_date based on control_date
+        if i == len(dates) - 1 and last_equal_control_date:  # If this is the last date
+            exit_date = control_date  # Set exit date to control date
+        else:
+            # Adjust entry_date and exit_date to fit within the 180-day period
+            entry_date = max(entry_date, beginning_180_days)
+            exit_date = min(exit_date, control_date)
 
         # Calculate the stay duration
-        if entry_date == exit_date:
-            stay_duration = 1  # If entry date is the same as exit date, count as 1 day
-        else:
-            stay_duration = (exit_date - entry_date).days + 1
+        stay_duration = max(1, (exit_date - entry_date).days + 1)
 
         # Accumulate the total days stayed
         total_days_stayed += stay_duration
@@ -116,11 +114,9 @@ def calculate_dates(instance, control_date, pre_fetched_dates=None, country=None
 
 
 def get_objs_disable_false(latest_dates):
-    patients_ukr = {}
-    patients_mld = {}
     patients_uzb = {}
-    patients_ukr_10 = {}
-    patients_mld_10 = {}
+    patients_ukr_20 = {}
+    patients_mld_20 = {}
 
     with transaction.atomic():
         for date in latest_dates:
@@ -128,44 +124,26 @@ def get_objs_disable_false(latest_dates):
 
             days_left, total_days_stayed = calculate_dates(obj, date.exit)
 
-            if days_left <= 10:
+            if days_left <= 20:
                 if obj.country == 'UKR':
-                    patients_ukr_10[date.surrogacy.name] = [days_left, total_days_stayed]
-
+                    patients_ukr_20[date.surrogacy.name] = [days_left, total_days_stayed]
                 else:
-                    patients_mld_10[date.surrogacy.name] = [days_left, total_days_stayed]
+                    patients_mld_20[date.surrogacy.name] = [days_left, total_days_stayed]
 
-            if 11 <= days_left <= 30:
-                if obj.country == 'UKR':
-                    patients_ukr[date.surrogacy.name] = [days_left, total_days_stayed]
-                else:
-                    patients_mld[date.surrogacy.name] = [days_left, total_days_stayed]
 
             if obj.country == 'UZB':
                 patients_uzb[date.surrogacy.name] = total_days_stayed
 
-    days_10_left_ukr = [
+    days_20_left_ukr = [
         f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
         for index, (k, v) in
-        enumerate(sorted(patients_ukr_10.items(), key=lambda item: item[1][0]), start=1)
+        enumerate(sorted(patients_ukr_20.items(), key=lambda item: item[1][0]), start=1)
     ]
 
-    days_30_left_ukr = [
+    days_20_left = [
         f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
         for index, (k, v) in
-        enumerate(sorted(patients_ukr.items(), key=lambda item: item[1][0]), start=1)
-    ]
-
-    days_10_left_mld = [
-        f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
-        for index, (k, v) in
-        enumerate(sorted(patients_mld_10.items(), key=lambda item: item[1][0]), start=1)
-    ]
-
-    days_30_left_mld = [
-        f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
-        for index, (k, v) in
-        enumerate(sorted(patients_mld.items(), key=lambda item: item[1][0]), start=1)
+        enumerate(sorted(patients_mld_20.items(), key=lambda item: item[1][0]), start=1)
     ]
 
     patients_uzb_days = [
@@ -174,20 +152,18 @@ def get_objs_disable_false(latest_dates):
         enumerate(sorted(patients_uzb.items()))
     ]
 
-    result = [(''.join(days_10_left_ukr), ''.join(days_30_left_ukr)),
-              (''.join(days_10_left_mld), ''.join(days_30_left_mld)),
+    result = [(''.join(days_20_left_ukr),),
+              (''.join(days_20_left),),
               (''.join(patients_uzb_days),)]
     return result
 
 
 async def make_message_content(result):
-    ukraine = f'🇺🇦 Меньше 10 дней:\n' + f'{result[0][0]}\n' + \
-              f'🇺🇦 От 10 до 30 дней:\n' + f'{result[0][1]}\n'
+    ukraine = f'🇺🇦 20 days and less:\n' + f'{result[0][0]}\n'
 
-    moldova = f'🇲🇩 Меньше 10 дней:\n' + f'{result[1][0]}\n' + \
-              f'🇲🇩 От 10 до 30 дней:\n' + f'{result[1][1]}\n'
+    moldova = f'🇲🇩 20 days and less:\n' + f'{result[1][0]}\n'
 
-    uzbekistan = f'🇺🇿 Всего дней:\n' + f'{result[2][0]}'
+    uzbekistan = f'🇺🇿 Days at all:\n' + f'{result[2][0]}'
 
     return ukraine + moldova + uzbekistan
 
@@ -221,15 +197,76 @@ def calculate_last_disable_dates_sync():
             entry=Subquery(latest_entry_subquery),
             disable=False
         )
-        return latest_dates.iterator(chunk_size=1000)
+        return latest_dates
 
 
 def get_last_message():
     with transaction.atomic():
-        return Message.objects.only('chat_id', 'message_id').order_by('-timestamp').first()
+        return Message.objects.order_by('-created_at').first()
 
 
 def delete_last_message(last_message):
     if last_message:
         with transaction.atomic():
             last_message.delete()
+
+
+def find_when_15_days_left(instance, control_date, pre_fetched_dates=None, country=None):
+    if pre_fetched_dates is not None and country is not None:
+        raise ValueError("You cannot use 'country' when 'pre_fetched_dates' is provided.")
+
+    kiev_tz = pytz.timezone('Europe/Kiev')
+    control_date = kiev_tz.localize(datetime.combine(control_date, datetime.min.time()))
+
+    date_when_15_days_left = None
+    days_incremented = 0
+    days_left = 0
+
+    while days_incremented <= 90:
+
+        beginning_180_days = control_date - timedelta(days=179)
+
+        if pre_fetched_dates is not None:
+            dates = [date for date in pre_fetched_dates
+                     if date.entry <= control_date.date() and date.exit >= beginning_180_days.date()]
+        else:
+            dates = list(Date.objects.filter(
+                surrogacy_id=instance.id,
+                entry__lte=control_date.date(),
+                exit__gte=beginning_180_days.date(),
+                country=instance.country if country is None else country
+            ).only('entry', 'exit').iterator(chunk_size=50))
+
+        # Calculate total days stayed in the 180-day window
+        total_days_stayed = 0
+        for i, date in enumerate(dates):
+
+            entry_date = kiev_tz.localize(datetime.combine(date.entry, datetime.min.time()))
+            exit_date = kiev_tz.localize(datetime.combine(date.exit, datetime.min.time()))
+
+            if i == len(dates) - 1:
+                exit_date = control_date
+            else:
+                entry_date = max(entry_date, beginning_180_days)
+                exit_date = min(exit_date, control_date)
+
+            # Calculate the stay duration
+            stay_duration = max(1, (exit_date - entry_date).days + 1)
+
+            total_days_stayed += stay_duration
+
+            days_left = 90 - total_days_stayed
+
+        if days_left == 15 and date_when_15_days_left is None:
+            date_when_15_days_left = control_date
+
+        if days_left == 0:
+            break
+
+        control_date += timedelta(days=1)
+        days_incremented += 1
+
+    if date_when_15_days_left is None:
+        return 'less 15 days'
+
+    return date_when_15_days_left.date()

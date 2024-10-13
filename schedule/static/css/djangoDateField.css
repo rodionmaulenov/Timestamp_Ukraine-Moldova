@@ -1,0 +1,32 @@
+#result_list .vDateField {
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+.tooltip_content .vDateField {
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+
+.datetimeshortcuts .date-icon {
+    background: url(../svg/calendar.svg) ;
+}
+
+
+
+
+
+
+
+
+
+

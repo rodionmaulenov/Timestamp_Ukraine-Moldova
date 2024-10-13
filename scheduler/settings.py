@@ -156,17 +156,32 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Kiev'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-CELERY_BEAT_SCHEDULE = {
-    'update-exit-field-every-day-5am': {
-        'task': 'schedule.tasks.update_exit_field',
-        'schedule': crontab(minute='0', hour='4'),  # Runs at 5:00 AM (UTC+1)
-    },
+if DEBUG:
+    CELERY_BEAT_SCHEDULE = {
+        'task-every-2-minutes': {
+            'task': 'schedule.tasks.send_message_to_work_group',
+            'schedule': crontab(minute='*/2'),
+        },
+    }
 
-    'send_message-every-day-5am': {
-        'task': 'schedule.tasks.send_message_to_work_group',
-        'schedule': crontab(minute='2', hour='4'),  # Runs at 5:02 AM (UTC+1)
-    },
-}
+else:
+    CELERY_BEAT_SCHEDULE = {
+        'update-exit-field-every-day-4am': {
+            'task': 'schedule.tasks.update_exit_field',
+            'schedule': crontab(minute='0', hour='4'),
+        },
+        'task-every-2-minutes': {
+            'task': 'schedule.tasks.send_message_to_work_group',
+            'schedule': crontab(minute='*/2'),
+        },
+    }
+
+
+
+    # 'send_message-every-day-4am': {
+    #     'task': 'schedule.tasks.send_message_to_work_group',
+    #     'schedule': crontab(minute='2', hour='4'),
+    # },
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -23,14 +23,6 @@
        {% if field.help_text %}<img src="{% static "admin/img/icon-unknown.svg" %}" class="help help-tooltip" width="10" height="10" alt="({{ field.help_text|striptags }})" title="{{ field.help_text|striptags }}">{% endif %}
        </th>
      {% endfor %}
-      <!-- Add the fold/unfold button here -->
-{#        <th>#}
-{#            <button id="fold-unfold-btn" type="button" style="border: none">#}
-{#                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">#}
-{#                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>#}
-{#                </svg>#}
-{#            </button>#}
-{#        </th>#}
      {% if inline_admin_formset.formset.can_delete and inline_admin_formset.has_delete_permission %}<th>{% translate "Delete?" %}</th>{% endif %}
      </tr></thead>
 
