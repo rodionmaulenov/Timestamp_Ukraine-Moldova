@@ -1,3 +1,15 @@
+{#<div id="control-date-container-{{ obj.pk }}-{{ country }}">#}
+{#    <input type="text"#}
+{#           id="control-date-{{ obj.pk }}-{{ country }}"#}
+{#           data-mother-id="{{ obj.pk }}"#}
+{#           data-mother-country="{{ obj.country }}"#}
+{#           data-country="{{ country }}"#}
+{#           class="vDateField"/>#}
+{##}
+{#</div>#}
+
+
+<p class="date">
 <div id="control-date-container-{{ obj.pk }}-{{ country }}">
     <input type="text"
            id="control-date-{{ obj.pk }}-{{ country }}"
@@ -5,10 +17,14 @@
            data-mother-country="{{ obj.country }}"
            data-country="{{ country }}"
            class="vDateField"/>
+
 </div>
-
-
-
+<span class="datetimeshortcuts">
+    <a href="#" id="calendarlink6">
+        <span class="date-icon" title="Choose a Date"></span>
+    </a>
+</span>
+</p>
 
 
 
