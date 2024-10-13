@@ -14,7 +14,6 @@
             <div class="tips" data-tooltip-before="Copy control dates to clipboard">
                 <img class="copy-deadline" src="{% static 'svg/copy.svg' %}" alt="Copy control dates">
             </div>
-              <!-- Conditional Logic Based on Country -->
             {% if country == "UKR" %}
                 <span>Ukraine deadlines</span>
             {% else %}
@@ -23,24 +22,30 @@
         </div>
 
         <div class="tooltip_content tooltip_additional">
-            <span>Control date UKR:</span>
+            {% if country == "UKR" %}
+                <span>Control date UKR:</span>
+            {% else %}
+                <span>Control date MLD:</span>
+            {% endif %}
             <div id="control-date-container-tooltip-{{ obj.pk }}-{{ country }}">
                 <input type="text"
                        id="control-date-{{ obj.pk }}-{{ country }}"
                        data-mother-id="{{ obj.pk }}"
                        data-mother-country="{{ obj.country }}"
                        data-country="{{ country }}"
-                       class="datepicker-here choose-date-input"
-                       placeholder="choose date"/>
+                       class="vDateField">
             </div>
         </div>
 
 
         <div class="tooltip_content tooltip_additional">
-            <span>Update date UKR:</span>
+            {% if country == "UKR" %}
+                <span>Update date UKR:</span>
+            {% else %}
+                <span>Update date MLD:</span>
+            {% endif %}
             <div class="update-date">{{ update_date_ukr }}</div>
         </div>
-
 
     </div>
 </div>

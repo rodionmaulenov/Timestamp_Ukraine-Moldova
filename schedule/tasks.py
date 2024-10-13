@@ -70,14 +70,14 @@ def send_message_to_work_group(self):
             one_hour_ago = timezone.now() - timedelta(hours=1)
             existing_message = await sync_to_async(lambda: Message.objects.filter(
                 message_hash=message_hash,
-                timestamp__gte=one_hour_ago
+                created_at__gte=one_hour_ago
             ).exists())()
 
             if existing_message:
                 logger.info("Duplicate message detected, skipping sending.")
                 return
 
-                # Obtain and send the cat photo
+            # Obtain and send the cat photo
             resized_photo = await get_random_cat_photo_with_text()
             if resized_photo is None:
                 logger.error("Could not fetch cat photo. Retrying...")
@@ -95,7 +95,6 @@ def send_message_to_work_group(self):
                 chat_id=chat_id,
                 message_id=sent_message.message_id,
                 message_hash=message_hash,
-                timestamp=timezone.now()
             )
 
             logger.info("Message successfully sent to the Telegram group.")

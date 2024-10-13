@@ -98,7 +98,7 @@ class Message(models.Model):
     chat_id = models.CharField(max_length=255)
     message_id = models.CharField(max_length=255)
     message_hash = models.CharField(max_length=64, unique=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Message {self.message_id} in Chat {self.chat_id}"
