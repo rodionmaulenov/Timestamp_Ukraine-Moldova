@@ -36,7 +36,7 @@
 //     }
 // });
 
-function initDateTimeShortcutsOverride() {
+function initDateTimeShortcutsOverride(observer) {
     // Check if DateTimeShortcuts is available
     if (typeof DateTimeShortcuts !== 'undefined') {
         // Save the original handleCalendarCallback function
