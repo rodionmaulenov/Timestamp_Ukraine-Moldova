@@ -3,52 +3,43 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function observeForChanges() {
-    // Create a MutationObserver to detect changes in the DOM
     const observer = new MutationObserver(function (mutationsList) {
         for (const mutation of mutationsList) {
             if (mutation.type === 'childList') {
-                // Temporarily disconnect observer to prevent infinite loop
                 observer.disconnect();
-                addDatetimeShortcut(observer);  // Pass the observer to reconnect later
-                observer.observe(targetNode, { childList: true, subtree: true });
+                addDatetimeShortcut();  // Initialize datepicker for new elements
+                observer.observe(mutation.target, { childList: true, subtree: true });
             }
         }
     });
 
-    // Start observing the target node for changes (the result_list table in this case)
     const targetNode = document.querySelector('#result_list');
     if (targetNode) {
-        observer.observe(targetNode, { childList: true, subtree: true }); // Observe the entire subtree
+        observer.observe(targetNode, { childList: true, subtree: true });
     }
 }
 
-function addDatetimeShortcut(observer) {
+function addDatetimeShortcut() {
     const allCustomCalendar = document.querySelectorAll("#result_list .custom_calendar");
 
     allCustomCalendar.forEach(function (dateShortcuts, index) {
-        // Check if the calendarlink already exists to prevent duplicates
-        if (!dateShortcuts.querySelector(`#calendarlink${index}`)) {
-            // Create the new <span> element
-            const span = document.createElement('span');
-            span.className = 'datetimeshortcuts';
+        const inputField = dateShortcuts.querySelector('input.vDateField');
 
-            const anchor = document.createElement('a');
-            anchor.href = '#';
-            anchor.id = `calendarlink${index}`;
+        // Check if DateTimeShortcuts is available
+        if (inputField && typeof DateTimeShortcuts !== 'undefined') {
+            // Only initialize if not already initialized
+            if (!inputField.dataset.calendarInitialized) {
+                DateTimeShortcuts.addCalendar(inputField.id);
+                inputField.dataset.calendarInitialized = "true"; // Mark as initialized
 
-            const icon = document.createElement('span');
-            icon.className = 'date-icon';
-            icon.title = 'Choose a Date';
-
-            // Append the icon to the anchor
-            anchor.appendChild(icon);
-            // Append the anchor to the span
-            span.appendChild(anchor);
-
-            // Insert the <span> after the input field inside the custom_calendar div
-            const inputField = dateShortcuts.querySelector('input');
-            if (inputField) {
-                inputField.after(span);
+                // Attach event listener to the calendar link to open the datepicker
+                const calendarLink = dateShortcuts.querySelector('a[id^="calendarlink"]');
+                if (calendarLink) {
+                    calendarLink.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        DateTimeShortcuts.openCalendar(index);
+                    });
+                }
             }
         }
     });

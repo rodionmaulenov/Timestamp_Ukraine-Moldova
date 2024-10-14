@@ -1,22 +1,28 @@
-{#<div id="control-date-container-{{ obj.pk }}-{{ country }}">#}
-{#    <input type="text"#}
-{#           id="control-date-{{ obj.pk }}-{{ country }}"#}
-{#           data-mother-id="{{ obj.pk }}"#}
-{#           data-mother-country="{{ obj.country }}"#}
-{#           data-country="{{ country }}"#}
-{#           class="vDateField"/>#}
+{#<div class="custom_calendar" id="control-date-container-{{ obj.pk }}-{{ country }}">#}
+{#    <p class="date">#}
+{#        <input type="text"#}
+{#               id="control-date-{{ obj.pk }}-{{ country }}"#}
+{#               data-mother-id="{{ obj.pk }}"#}
+{#               data-mother-country="{{ obj.country }}"#}
+{#               data-country="{{ country }}"#}
+{#               class="vDateField"/>#}
 {##}
+{#        <span class="datetimeshortcuts">#}
+{#            &nbsp;#}
+{#            <a href="#">Today</a>#}
+{#            &nbsp;|&nbsp;#}
+{#            <a href="#" id="calendarlink1">#}
+{#                <span class="date-icon" title="Choose a Date"></span>#}
+{#            </a>#}
+{#        </span>#}
+{#    </p>#}
 {#</div>#}
 
-
 <div class="custom_calendar" id="control-date-container-{{ obj.pk }}-{{ country }}">
-    <input type="text"
-           id="control-date-{{ obj.pk }}-{{ country }}"
-           data-mother-id="{{ obj.pk }}"
-           data-mother-country="{{ obj.country }}"
-           data-country="{{ country }}"
-           class="vDateField"/>
+        {{ form.control_date }}
 </div>
+
+
 
 
 
