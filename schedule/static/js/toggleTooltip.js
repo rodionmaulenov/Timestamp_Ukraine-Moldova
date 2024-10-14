@@ -33,6 +33,7 @@ function toggleTooltip(surrogacyName, event, element) {
     activeElement = element
 
     initializeDjangoCalendarInTooltip(tooltipElement)
+    cleanupDateShortcutsAndWarningsTooltip(tooltipElement)
     tipBefore(tooltipElement)
     svgEffectsWhenClicking(tooltipElement)
 
@@ -75,6 +76,29 @@ function closeTooltip() {
 }
 
 
+function cleanupDateShortcutsAndWarningsTooltip(toolTip) {
+
+    const container = toolTip.querySelector('.custom_calendar')
+    if (container) {
+        const dateShortcuts = container.querySelectorAll('.datetimeshortcuts');
+        if (dateShortcuts.length > 1) {dateShortcuts[1].remove();
+
+        }
+    }
+    const dateShortcut = container.querySelector(".datetimeshortcuts")
+    if (dateShortcut) {
+        const nodes = Array.from(dateShortcut.childNodes)
+
+        nodes.forEach(function (node) {
+            if (node.nodeType === Node.ELEMENT_NODE && !(node.id && node.id.startsWith('calendarlink'))) {
+                node.remove()
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                node.remove()
+            }
+        });
+    }
+
+}
 
 
 
