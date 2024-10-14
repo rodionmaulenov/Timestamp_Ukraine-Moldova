@@ -27,13 +27,11 @@
             {% else %}
                 <span>Control date MLD:</span>
             {% endif %}
-            <div id="control-date-container-tooltip-{{ obj.pk }}-{{ country }}">
-                <input type="text"
-                       id="control-date-{{ obj.pk }}-{{ country }}"
-                       data-mother-id="{{ obj.pk }}"
-                       data-mother-country="{{ obj.country }}"
-                       data-country="{{ country }}"
-                       class="vDateField">
+            <div class="custom_calendar" id="control-date-container-{{ obj.pk }}-{{ country }}"
+                 data-mother-id="{{ obj.pk }}"
+                 data-mother-country="{{ obj.country }}"
+                 data-country="{{ country }}">
+                {{ form.control_date }}
             </div>
         </div>
 

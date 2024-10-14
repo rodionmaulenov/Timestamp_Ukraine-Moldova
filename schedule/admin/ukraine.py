@@ -164,10 +164,14 @@ class UkraineAdmin(admin.ModelAdmin):
         days_left, _ = calculate_dates(obj, control_date, last_equal_control_date=True)
         return JsonResponse({'days_left': days_left})
 
-    @admin.action(description=_('Control dates Moldova'))
+    @admin.action(description=_('Moldova`s dates'))
     def mld_inform_card_link(self, obj):
+
+        form = ControlDateForm()
+
         return format_html((render_to_string('admin/schedule/inform_card.html',
                                              {
+                                                 'form': form,
                                                  'obj': obj,
                                                  'country': 'MLD',
                                                  'update_date_ukr': self.get_update_date_in_mld(obj)

@@ -43,6 +43,24 @@
     opacity: 1;
 }
 
+.tooltip_element.active .custom_calendar p {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.tooltip_element.active .custom_calendar .datetimeshortcuts a::after {
+    content: ' choose';
+    color: #1f2328;
+}
+
+.tooltip_element.active .custom_calendar .datetimeshortcuts a:hover::after {
+    text-decoration: underline;
+    color: #0969da;
+}
+
+.tooltip_element.active  .custom_calendar .date-icon {
+    background: url(../svg/calendar.svg);
+}
+
 
 .tooltip_content {
     white-space: nowrap;

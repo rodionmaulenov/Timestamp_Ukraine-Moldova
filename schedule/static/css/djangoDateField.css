@@ -1,3 +1,8 @@
+#result_list .date {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
 #result_list .vDateField {
     visibility: hidden !important;
     width: 0 !important;
@@ -17,9 +22,21 @@
 }
 
 
-.datetimeshortcuts .date-icon {
-    background: url(../svg/calendar.svg) ;
+#result_list .datetimeshortcuts .date-icon {
+    background: url(../svg/calendar.svg);
 }
+
+
+#result_list .datetimeshortcuts a::after {
+    content: ' choose';
+    color: #1f2328;
+}
+
+#result_list .datetimeshortcuts a:hover::after {
+    text-decoration: underline;
+    color: #0969da;
+}
+
 
 
 

@@ -37,9 +37,9 @@ class MoldovaAdmin(admin.ModelAdmin):
 
     class Media:
         css = {
-            'all': ('admin/css/widgets.css', 'css/image_scale.css', 'css/tooltip.css', 'css/djangoDateField.css')
+            'all': ('css/image_scale.css', 'css/tooltip.css', 'css/djangoDateField.css')
         }
-        js =  'js/addDateCalendar.js', 'js/imageScale.js', 'js/hidePelement.js', 'js/calculateDatesByURL.js', \
+        js = 'js/rmExtraDateShortcut.js', 'js/imageScale.js', 'js/hidePelement.js', 'js/calculateDatesByURL.js', \
             'js/toggleTooltip.js', 'js/copyCalcDatesToClipboard.js', 'js/tips.js',
 
     def get_fields(self, request, obj=None):
@@ -168,10 +168,14 @@ class MoldovaAdmin(admin.ModelAdmin):
         days_left, _ = calculate_dates(obj, control_date, last_equal_control_date=True)
         return JsonResponse({'days_left': days_left})
 
-    @admin.action(description=_('Control dates Ukraine'))
+    @admin.action(description=_('Ukraine`s dates'))
     def ukr_inform_card_link(self, obj):
+
+        form = ControlDateForm()
+
         return format_html((render_to_string('admin/schedule/inform_card.html',
                                              {
+                                                 'form': form,
                                                  'obj': obj,
                                                  'country': 'UKR',
                                                  'update_date_ukr': self.get_update_date_in_ukr(obj)
