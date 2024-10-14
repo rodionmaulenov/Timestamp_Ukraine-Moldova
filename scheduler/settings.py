@@ -248,10 +248,6 @@ else:
 
     # Static files (CSS, JavaScript, images)
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    STATIC_ROOT = BASE_DIR / 'static'
-    STATICFILES_DIRS = [
-        BASE_DIR / 'staticfiles',
-    ]
 
     # Media files (User uploads)
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
