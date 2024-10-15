@@ -135,19 +135,19 @@ def get_objs_disable_false(latest_dates):
                     patients_uzb[date.surrogacy.name] = total_days_stayed
 
     days_20_left_ukr = [
-        f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
+        f'{convert_number_to_emoji(index)}*{k}*\n\tОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
         for index, (k, v) in
         enumerate(sorted(patients_ukr_20.items(), key=lambda item: item[1][0]), start=1)
     ]
 
     days_20_left = [
-        f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
+        f'{convert_number_to_emoji(index)}*{k}*\n\tОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
         for index, (k, v) in
         enumerate(sorted(patients_mld_20.items(), key=lambda item: item[1][0]), start=1)
     ]
 
     patients_uzb_days = [
-        f'{convert_number_to_emoji(index)}*{k}*\nПрошло: *{v}*\n'
+        f'{convert_number_to_emoji(index)}*{k}*\n\tПрошло: *{v}*\n'
         for index, (k, v) in
         enumerate(sorted(patients_uzb.items()))
     ]

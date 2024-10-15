@@ -170,16 +170,11 @@ else:
             'task': 'schedule.tasks.update_exit_field',
             'schedule': crontab(minute='0', hour='4'),
         },
-        'task-every-2-minutes': {
+        'send_message-every-day-4am': {
             'task': 'schedule.tasks.send_message_to_work_group',
-            'schedule': crontab(minute='*/2'),
+            'schedule': crontab(minute='30', hour='4'),
         },
     }
-
-    # 'send_message-every-day-4am': {
-    #     'task': 'schedule.tasks.send_message_to_work_group',
-    #     'schedule': crontab(minute='30', hour='4'),
-    # },
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -1,6 +1,6 @@
 import logging
 from aiogram.enums import ParseMode
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramRetryAfter
 from django.db import transaction
 from django.utils import timezone
 import hashlib
@@ -115,6 +115,12 @@ def send_message_to_work_group(self):
             )
 
             logger.info("Message successfully sent to the Telegram group.")
+
+        except TelegramRetryAfter as e:
+            # Handle Telegram's rate-limiting
+            retry_after = e.retry_after
+            logger.warning(f"Telegram rate limit exceeded, retrying in {retry_after} seconds.")
+            self.retry(countdown=retry_after)
 
         except Exception as e:
             logger.error("An error occurred while sending the message: %s", str(e))
