@@ -130,9 +130,9 @@ def get_objs_disable_false(latest_dates):
                 else:
                     patients_mld_20[date.surrogacy.name] = [days_left, total_days_stayed]
 
-
-            if obj.country == 'UZB':
-                patients_uzb[date.surrogacy.name] = total_days_stayed
+            if total_days_stayed >= 50:
+                if obj.country == 'UZB':
+                    patients_uzb[date.surrogacy.name] = total_days_stayed
 
     days_20_left_ukr = [
         f'{convert_number_to_emoji(index)}*{k}*\nОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
@@ -194,7 +194,7 @@ def calculate_last_disable_dates_sync():
         ).order_by('-exit').values('exit')[:1]
 
         latest_dates = Date.objects.filter(
-            entry=Subquery(latest_entry_subquery),
+            exit=Subquery(latest_entry_subquery),
             disable=False
         )
         return latest_dates

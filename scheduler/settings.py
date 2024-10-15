@@ -107,18 +107,7 @@ WSGI_APPLICATION = 'scheduler.wsgi.application'
 
 DOCKER = os.environ.get('DOCKER') == 'True'
 
-if DOCKER and DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('POSTGRES_DB'),
-            'USER': os.environ.get('POSTGRES_USER'),
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-            'HOST': os.environ.get('POSTGRES_HOST'),
-            'PORT': '5432',
-        }
-    }
-elif DEBUG:
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -126,6 +115,17 @@ elif DEBUG:
             'USER': 'me',
             'PASSWORD': 'password',
             'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
+elif DOCKER and DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB'),
+            'USER': os.environ.get('POSTGRES_USER'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+            'HOST': os.environ.get('POSTGRES_HOST'),
             'PORT': '5432',
         }
     }
@@ -176,11 +176,9 @@ else:
         },
     }
 
-
-
     # 'send_message-every-day-4am': {
     #     'task': 'schedule.tasks.send_message_to_work_group',
-    #     'schedule': crontab(minute='2', hour='4'),
+    #     'schedule': crontab(minute='30', hour='4'),
     # },
 
 # Password validation

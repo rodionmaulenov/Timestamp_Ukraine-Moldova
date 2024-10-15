@@ -24,6 +24,5 @@ async def main():
 # @dp.message(F.text == '/start')
 # async def get_chat_id(message:Message):
 #     return message.answer(text=str(message.chat.id))
-
 if __name__ == "__main__":
     asyncio.run(main())
