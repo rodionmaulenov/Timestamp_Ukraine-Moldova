@@ -19,15 +19,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const observer = new MutationObserver(function (mutationsList) {
         if (!scheduled) {
             scheduled = true;
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList') {
                         cleanupRedundantLinkAndWarnings();
                         addListenersForClick();
                     }
                 }
-                scheduled = false;
-            }, 30); // Slight delay to batch DOM updates
+                scheduled = false; // reset after running
+            });
         }
     });
 
@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
         observer.observe(targetNode, { childList: true, subtree: true }); // Observe the entire subtree
     }
 });
-
 
 
 function cleanupRedundantLinkAndWarnings() {
