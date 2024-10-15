@@ -29,7 +29,7 @@ class MoldovaAdmin(admin.ModelAdmin):
         "4. <b>Control date</b>: Allows you to check the status for a specific date.")
     )
     list_per_page = 20
-    ordering = 'days_left',
+    ordering = '-days_left',
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = NewCountryDateInline,
@@ -40,7 +40,7 @@ class MoldovaAdmin(admin.ModelAdmin):
         css = {
             'all': ('css/image_scale.css', 'css/tooltip.css', 'css/djangoDateField.css')
         }
-        js = ('js/rmExtraDateShortcut.js', 'js/inline/tabularInline.js', 'js/imageScale.js', 'js/hidePelement.js',
+        js = ('js/inline/tabularInline.js', 'js/imageScale.js', 'js/hidePelement.js',
               'js/calculateDatesByURL.js', 'js/toggleTooltip.js', 'js/copyCalcDatesToClipboard.js', 'js/tips.js',)
 
     def get_fields(self, request, obj=None):
