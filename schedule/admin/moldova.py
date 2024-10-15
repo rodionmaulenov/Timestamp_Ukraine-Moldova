@@ -40,7 +40,7 @@ class MoldovaAdmin(admin.ModelAdmin):
         css = {
             'all': ('css/image_scale.css', 'css/tooltip.css', 'css/djangoDateField.css')
         }
-        js = ('js/inline/tabularInline.js', 'js/imageScale.js', 'js/hidePelement.js',
+        js = ('js/rmExtraDateShortcut.js', 'js/inline/tabularInline.js', 'js/imageScale.js', 'js/hidePelement.js',
               'js/calculateDatesByURL.js', 'js/toggleTooltip.js', 'js/copyCalcDatesToClipboard.js', 'js/tips.js',)
 
     def get_fields(self, request, obj=None):
