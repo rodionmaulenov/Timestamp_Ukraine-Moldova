@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Access the input field and log the new date value
                 const inputField = DateTimeShortcuts.calendarInputs[num]
                 if (inputField) {
+
                     const selectedDate = inputField.value
                     const parentDivContainer = inputField.closest('.custom_calendar')
                     const surrogacyMotherId = parentDivContainer.getAttribute('data-mother-id')
