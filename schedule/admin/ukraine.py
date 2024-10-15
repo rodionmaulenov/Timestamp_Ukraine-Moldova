@@ -24,7 +24,7 @@ class UkraineAdmin(admin.ModelAdmin):
         "3. <b>Days Left</b>: Displays the number of remaining days in the current stay period.<br>"
         "4. <b>Control date</b>: Allows you to check the status for a specific date.")
     )
-    list_per_page = 15
+    list_per_page = 20
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = NewCountryDateInline,

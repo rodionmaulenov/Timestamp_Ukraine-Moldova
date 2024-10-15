@@ -28,7 +28,7 @@ class AutocompleteMotherAdmin(admin.ModelAdmin):
 class UzbekistanAdmin(admin.ModelAdmin):
     autocomplete_fields = 'related_mother',
     inlines = NewCountryDateInline,
-    list_per_page = 15
+    list_per_page = 20
     ordering = '-created',
     search_fields = 'name', 'country'
     readonly_fields = 'country',
