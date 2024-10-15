@@ -7,8 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
             requestAnimationFrame(() => {
                 for (const mutation of mutationsList) {
                     if (mutation.type === 'childList') {
-                        cleanupRedundantLinkAndWarnings();
-                        addListenersForClick();
+                        removeRedundantDateTimeShortcut()
                     }
                 }
                 scheduled = false; // reset after running
@@ -18,6 +17,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const targetNode = document.querySelector('.tabular');
     if (targetNode) {
-        observer.observe(targetNode, { childList: true, subtree: true }); // Observe the entire subtree
+        observer.observe(targetNode, {childList: true, subtree: true}); // Observe the entire subtree
     }
 });
+
+function removeRedundantDateTimeShortcut() {
+
+    const tableDateShortcuts = document.querySelectorAll(".tabular .date");
+
+    tableDateShortcuts.forEach((dateElement) => {
+        const shortcuts = dateElement.querySelectorAll('.datetimeshortcuts');
+
+        if (shortcuts.length > 1) {
+            // Remove the second shortcut if it exists
+            shortcuts[1].remove();
+        }
+    });
+
+
+    const allTimezoneWarnings = document.querySelectorAll('.help.timezonewarning')
+    allTimezoneWarnings.forEach(function (timezoneWarningDiv) {
+        timezoneWarningDiv.remove()
+    });
+}
