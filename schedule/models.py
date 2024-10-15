@@ -2,6 +2,7 @@ import os
 import re
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 COUNTRY_CHOICES = [
@@ -34,7 +35,7 @@ class SurrogacyMother(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to=directory_path, default='')
     related_mother = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
-    days_left = models.DateTimeField(null=True)
+    days_left = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.name
