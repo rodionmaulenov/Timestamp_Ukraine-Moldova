@@ -8,7 +8,9 @@ COUNTRY_CHOICES = [
     ('MLD', _('Moldova')),
     ('UKR', _('Ukraine')),
     ('UZB', _('Uzbekistan')),
+    ('NIP', _('NotInProgram')),
 ]
+
 
 def clean_filepath(filename):
     # Define a regular expression pattern to match prohibited characters, including apostrophes
@@ -92,6 +94,13 @@ class Uzbekistan(SurrogacyMother):
         proxy = True
         verbose_name = _('Uzbekistan')
         verbose_name_plural = _('Uzbekistan')
+
+
+class NotInProgram(SurrogacyMother):
+    class Meta:
+        proxy = True
+        verbose_name = _('NotInProgram')
+        verbose_name_plural = _('NotInProgram')
 
 
 class Message(models.Model):
