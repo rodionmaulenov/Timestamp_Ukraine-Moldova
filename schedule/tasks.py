@@ -54,7 +54,7 @@ def update_exit_field():
             SurrogacyMother.objects.bulk_update(updates, ['days_left'])
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=900)
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_message_to_work_group(self):
     async def async_send_message():
         try:
