@@ -6,12 +6,12 @@ from django.utils import timezone
 import hashlib
 from celery import shared_task
 import pytz
-from datetime import timedelta
+from datetime import timedelta, datetime
 import asyncio
 from schedule.telegram import chat_id
-from schedule.models import Message
+from schedule.models import Message, SurrogacyMother
 from schedule.services import get_objs_disable_false, get_random_cat_photo_with_text, calculate_last_disable_dates_sync, \
-    make_message_content, get_last_message, delete_last_message
+    make_message_content, get_last_message, delete_last_message, calculate_dates
 from schedule.telegram import bot
 from asgiref.sync import sync_to_async
 
@@ -36,8 +36,25 @@ def update_exit_field():
             # Update the exit date for the latest dates
             latest_dates.update(exit=day_today)
 
+        mothers = SurrogacyMother.objects.all()
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+        updates = []
+
+        for mother in mothers:
+            days_left, _ = calculate_dates(mother, timezone.now(), country=mother.country)
+
+            if mother.days_left != days_left:
+                if isinstance(days_left, datetime):
+                    days_left = days_left.isoformat()
+                    mother.days_left = days_left
+                    updates.append(mother)
+
+        # Perform bulk update of SurrogacyMother objects
+        if updates:
+            SurrogacyMother.objects.bulk_update(updates, ['days_left'])
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=900)
 def send_message_to_work_group(self):
     async def async_send_message():
         try:
