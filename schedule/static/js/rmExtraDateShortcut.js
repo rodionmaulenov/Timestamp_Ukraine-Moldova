@@ -1,67 +1,17 @@
-// document.addEventListener("DOMContentLoaded", function () {
-//     const observer = new MutationObserver(function (mutationsList) {
-//         for (const mutation of mutationsList) {
-//             if (mutation.type === 'childList') {
-//                 cleanupRedundantLinkAndWarnings()
-//                 addListenersForClick()
-//             }
-//         }
-//     });
-//
-//     const targetNode = document.querySelector('#result_list')
-//     if (targetNode) {
-//         observer.observe(targetNode, {childList: true, subtree: true}) // Observe the entire subtree
-//     }
-// });
-//
-// document.addEventListener("DOMContentLoaded", function () {
-//     let scheduled = false;
-//
-//     const observer = new MutationObserver(function (mutationsList) {
-//         if (!scheduled) {
-//             scheduled = true;
-//             requestAnimationFrame(() => {
-//                 for (const mutation of mutationsList) {
-//                     if (mutation.type === 'childList') {
-//                         cleanupRedundantLinkAndWarnings();
-//                         addListenersForClick();
-//                     }
-//                 }
-//                 scheduled = false; // reset after running
-//             });
-//         }
-//     });
-//
-//     const targetNode = document.querySelector('#result_list');
-//     if (targetNode) {
-//         observer.observe(targetNode, { childList: true, subtree: true }); // Observe the entire subtree
-//     }
-// });
-
 document.addEventListener("DOMContentLoaded", function () {
-    setTimeout(() => {
-        let scheduled = false;
-
-        const observer = new MutationObserver(function (mutationsList) {
-            if (!scheduled) {
-                scheduled = true;
-                requestAnimationFrame(() => {
-                    for (const mutation of mutationsList) {
-                        if (mutation.type === 'childList') {
-                            cleanupRedundantLinkAndWarnings();
-                            addListenersForClick();
-                        }
-                    }
-                    scheduled = false; // reset after running
-                });
+    const observer = new MutationObserver(function (mutationsList) {
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                cleanupRedundantLinkAndWarnings()
+                addListenersForClick()
             }
-        });
-
-        const targetNode = document.querySelector('#result_list');
-        if (targetNode) {
-            observer.observe(targetNode, { childList: true, subtree: true }); // Observe the entire subtree
         }
-    }, 0);
+    });
+
+    const targetNode = document.querySelector('#result_list')
+    if (targetNode) {
+        observer.observe(targetNode, {childList: true, subtree: true}) // Observe the entire subtree
+    }
 });
 
 
