@@ -19,7 +19,7 @@ def clean_filepath(filename):
 
 
 def directory_path(instance, filename):
-    return f'{clean_filepath("_".join(instance.name.split()))}/{filename}'
+    return f'SurrogacyMother/{clean_filepath("_".join(instance.name.split()))}/{filename}'
 
 
 class SurrogacyMother(models.Model):

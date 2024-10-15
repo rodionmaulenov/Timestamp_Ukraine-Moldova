@@ -38,7 +38,8 @@ class UzbekistanAdmin(admin.ModelAdmin):
         css = {
             'all': ('css/image_scale.css',)
         }
-        js = 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js', 'js/shortenTextInTag.js',
+        js = ('js/inline/tabularInline.js', 'js/imageScale.js', 'js/controlDate.js', 'js/hidePelement.js',
+              'js/shortenTextInTag.js',)
 
     def get_search_results(self, request, queryset, search_term):
 
@@ -102,7 +103,6 @@ class UzbekistanAdmin(admin.ModelAdmin):
 
     @admin.action(description=_('Image'))
     def get_html_photo(self, obj):
-
         if obj.file:
             file_url = obj.file.url
 
@@ -112,7 +112,8 @@ class UzbekistanAdmin(admin.ModelAdmin):
                 return format_html(
                     """
                     <div class='image-container'>
-                        <img src='{}' class='hoverable-image' />
+                        <a href="#" class="view-photo-link">view</a>
+                        <img src='{}' class='hoverable-image' style="display:none;" />
                     </div>
                     """, file_url
                 )
