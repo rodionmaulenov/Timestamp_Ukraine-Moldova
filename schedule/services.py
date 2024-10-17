@@ -1,10 +1,12 @@
 import logging
+from typing import Union, Optional
 import pytz
 from datetime import timedelta, datetime
+from django.utils import timezone as django_timezone
 from django.db import transaction
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, QuerySet
 from aiogram.types import BufferedInputFile
-from schedule.models import Date, Message
+from schedule.models import Date, Message, SurrogacyMother
 from PIL import Image
 from io import BytesIO
 import aiohttp
@@ -113,59 +115,86 @@ def calculate_dates(instance, control_date, pre_fetched_dates=None, country=None
     return days_left, total_days_stayed
 
 
+def get_date_or_str(value: Union[datetime.date, str]) -> Union[int, str]:
+    if isinstance(value, str):
+        return value
+
+    kiev_tz = pytz.timezone('Europe/Kiev')
+    localize_date_today = django_timezone.now().astimezone(kiev_tz).date()
+    date_when_15_days_left = value
+    days_difference = (localize_date_today - date_when_15_days_left).days
+
+    if date_when_15_days_left > localize_date_today:
+        return 16
+    elif days_difference > 15:
+        return -(days_difference - 15)
+    elif days_difference == 15:
+        return 15
+    elif days_difference < 15:
+        return 15 - days_difference
+
+
+def format_date(date_value: datetime.date) -> str:
+    if isinstance(date_value, str):
+        return date_value
+    return date_value.strftime('%b. %-d, %Y')
+
+def format_days_left_message(days_left: int) -> str:
+    # Check if the number is negative
+    if 2 < days_left <= 7:
+        return f"{days_left}⚠️"
+    elif days_left <= 2:
+        return f"{days_left}🚑"
+    else:
+        return f"{days_left}"
+
+
 def get_objs_disable_false(latest_dates):
-    patients_uzb = {}
-    patients_ukr_20 = {}
-    patients_mld_20 = {}
+    patients_ukr_15 = {}
+    patients_mld_15 = {}
 
     with transaction.atomic():
         for date in latest_dates:
-            obj = date.surrogacy
+            surrogacy = date.surrogacy
 
-            days_left, total_days_stayed = calculate_dates(obj, date.exit)
+            date_when_15_days_left = find_when_15_days_left(surrogacy, date.exit)
 
-            if days_left <= 20:
-                if obj.country == 'UKR':
-                    patients_ukr_20[date.surrogacy.name] = [days_left, total_days_stayed]
+            if isinstance(date_when_15_days_left, str) or \
+                    surrogacy and date_when_15_days_left is not None and \
+                    get_date_or_str(date_when_15_days_left) <= 15:
+
+                if surrogacy.country == 'UKR':
+                    patients_ukr_15[surrogacy.name] = [date_when_15_days_left]
                 else:
-                    patients_mld_20[date.surrogacy.name] = [days_left, total_days_stayed]
-
-            if total_days_stayed >= 50:
-                if obj.country == 'UZB':
-                    patients_uzb[date.surrogacy.name] = total_days_stayed
+                    patients_mld_15[surrogacy.name] = [date_when_15_days_left]
 
     days_20_left_ukr = [
-        f'{convert_number_to_emoji(index)}*{k}*\n\tОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
+        (f'{convert_number_to_emoji(index)}*{k}*\n\t'
+         f'     Отсчет 15-ти дней: *{format_date(v[0])}*;\n\t'
+         f'     Дней осталось: *{format_days_left_message(get_date_or_str(v[0]))}*\n')
         for index, (k, v) in
-        enumerate(sorted(patients_ukr_20.items(), key=lambda item: item[1][0]), start=1)
+        enumerate(sorted(patients_ukr_15.items(), key=lambda item: item, reverse=True), start=1)
     ]
 
     days_20_left = [
-        f'{convert_number_to_emoji(index)}*{k}*\n\tОсталось: *{v[0]}* Прошло: *{v[1]}*\n'
+        (f'{convert_number_to_emoji(index)}*{k}*\n\t'
+         f'     Отсчет 15-ти дней: *{format_date(v[0])}*;\n\t'
+         f'     Дней осталось: *{format_days_left_message(get_date_or_str(v[0]))}*\n')
         for index, (k, v) in
-        enumerate(sorted(patients_mld_20.items(), key=lambda item: item[1][0]), start=1)
-    ]
-
-    patients_uzb_days = [
-        f'{convert_number_to_emoji(index)}*{k}*\n\tПрошло: *{v}*\n'
-        for index, (k, v) in
-        enumerate(sorted(patients_uzb.items()))
+        enumerate(sorted(patients_mld_15.items(), key=lambda item: item, reverse=True), start=1)
     ]
 
     result = [(''.join(days_20_left_ukr),),
-              (''.join(days_20_left),),
-              (''.join(patients_uzb_days),)]
+              (''.join(days_20_left),), ]
     return result
 
 
 async def make_message_content(result):
-    ukraine = f'🇺🇦 20 days and less:\n' + f'{result[0][0]}\n'
+    ukraine = f'🇺🇦 When 15 days left date:\n\n{result[0][0]}\n'
 
-    moldova = f'🇲🇩 20 days and less:\n' + f'{result[1][0]}\n'
+    moldova = f'🇲🇩 When 15 days left date:\n\n{result[1][0]}\n'
 
-    uzbekistan = f'🇺🇿 Days at all:\n' + f'{result[2][0]}'
-
-    return ukraine + moldova + uzbekistan
+    return ukraine + moldova
 
 
 def convert_number_to_emoji(number, start_from=1):
@@ -211,18 +240,23 @@ def delete_last_message(last_message):
             last_message.delete()
 
 
-def find_when_15_days_left(instance, control_date, pre_fetched_dates=None, country=None):
+def find_when_15_days_left(instance: SurrogacyMother,
+                           control_date: datetime,
+                           pre_fetched_dates: Optional[QuerySet[Date]] = None,
+                           country: str = None
+                           ) -> Union[datetime.date, str]:
     if pre_fetched_dates is not None and country is not None:
         raise ValueError("You cannot use 'country' when 'pre_fetched_dates' is provided.")
 
     kiev_tz = pytz.timezone('Europe/Kiev')
+
     control_date = kiev_tz.localize(datetime.combine(control_date, datetime.min.time()))
 
     date_when_15_days_left = None
     days_incremented = 0
     days_left = 0
 
-    while days_incremented <= 90:
+    while days_incremented < 90 or days_left > 0:
 
         beginning_180_days = control_date - timedelta(days=179)
 
@@ -236,6 +270,9 @@ def find_when_15_days_left(instance, control_date, pre_fetched_dates=None, count
                 exit__gte=beginning_180_days.date(),
                 country=instance.country if country is None else country
             ).only('entry', 'exit').iterator(chunk_size=50))
+
+        if len(dates) <= 0:
+            return 'has`t computed dates'
 
         # Calculate total days stayed in the 180-day window
         total_days_stayed = 0
@@ -257,8 +294,11 @@ def find_when_15_days_left(instance, control_date, pre_fetched_dates=None, count
 
             days_left = 90 - total_days_stayed
 
-        if days_left == 15 and date_when_15_days_left is None:
-            date_when_15_days_left = control_date
+        if days_left < 0 and date_when_15_days_left is None:
+            return 'Over limit'
+
+        if days_left == 0 and date_when_15_days_left is None:
+            date_when_15_days_left = control_date - timedelta(days=15)
 
         if days_left == 0:
             break
@@ -266,7 +306,4 @@ def find_when_15_days_left(instance, control_date, pre_fetched_dates=None, count
         control_date += timedelta(days=1)
         days_incremented += 1
 
-    if date_when_15_days_left is None:
-        return 'less 15 days'
-
-    return date_when_15_days_left.date()
+    return date_when_15_days_left.date() if date_when_15_days_left else "Couldn't determine date"
