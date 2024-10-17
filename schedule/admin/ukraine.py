@@ -25,7 +25,6 @@ class UkraineAdmin(admin.ModelAdmin):
         "4. <b>Control date</b>: Allows you to check the status for a specific date.")
     )
     list_per_page = 20
-    ordering = 'days_left',
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     inlines = NewCountryDateInline,

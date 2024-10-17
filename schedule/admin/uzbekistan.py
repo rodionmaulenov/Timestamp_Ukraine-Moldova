@@ -29,7 +29,6 @@ class UzbekistanAdmin(admin.ModelAdmin):
     autocomplete_fields = 'related_mother',
     inlines = NewCountryDateInline,
     list_per_page = 20
-    ordering = 'days_left',
     search_fields = 'name', 'country'
     readonly_fields = 'country',
     list_display = 'name', 'get_html_photo', 'calculate_days', 'country'
