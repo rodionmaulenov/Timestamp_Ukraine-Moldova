@@ -1,5 +1,5 @@
 from django.contrib import admin
 
-@admin.register(Moldova)
+@admin.register()
 class notinprogram(admin.ModelAdmin):
     pass
