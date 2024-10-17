@@ -294,14 +294,15 @@ def find_when_15_days_left(instance: SurrogacyMother,
 
             days_left = 90 - total_days_stayed
 
-        if days_left < 0 and date_when_15_days_left is None:
-            return 'Over limit'
 
         if days_left == 0 and date_when_15_days_left is None:
             date_when_15_days_left = control_date - timedelta(days=15)
 
         if days_left == 0:
             break
+
+        if days_left < 0 and date_when_15_days_left is None:
+            return 'Over limit'
 
         control_date += timedelta(days=1)
         days_incremented += 1

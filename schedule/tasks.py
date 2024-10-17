@@ -36,23 +36,6 @@ def update_exit_field():
             # Update the exit date for the latest dates
             latest_dates.update(exit=day_today)
 
-        mothers = SurrogacyMother.objects.all()
-
-        updates = []
-
-        for mother in mothers:
-            days_left, _ = calculate_dates(mother, timezone.now(), country=mother.country)
-
-            if mother.days_left != days_left:
-                if isinstance(days_left, datetime):
-                    days_left = days_left.isoformat()
-                    mother.days_left = days_left
-                    updates.append(mother)
-
-        # Perform bulk update of SurrogacyMother objects
-        if updates:
-            SurrogacyMother.objects.bulk_update(updates, ['days_left'])
-
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_message_to_work_group(self):

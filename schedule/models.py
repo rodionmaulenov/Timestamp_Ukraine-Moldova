@@ -35,7 +35,6 @@ class SurrogacyMother(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to=directory_path, default='')
     related_mother = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
-    days_left = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.name
