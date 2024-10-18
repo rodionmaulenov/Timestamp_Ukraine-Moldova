@@ -115,7 +115,7 @@ def calculate_dates(instance, control_date, pre_fetched_dates=None, country=None
     return days_left, total_days_stayed
 
 
-def get_date_or_str(value: Union[datetime.date, str]) -> Union[int, str]:
+def get_date_or_str(value: datetime.date | str) -> int | str:
     if isinstance(value, str):
         return value
 
@@ -139,7 +139,9 @@ def format_date(date_value: datetime.date) -> str:
         return date_value
     return date_value.strftime('%b. %-d, %Y')
 
-def format_days_left_message(days_left: int) -> str:
+def format_days_left_message(days_left: int) -> str | str:
+    if isinstance(days_left, str):
+        return days_left
     # Check if the number is negative
     if 2 < days_left <= 7:
         return f"{days_left}⚠️"
